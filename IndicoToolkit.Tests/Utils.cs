@@ -7,7 +7,7 @@ namespace IndicoToolkit.Tests
 {
     public class Utils 
     {
-        static string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+        static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
         
         public static dynamic LoadJson(string path)
         {
