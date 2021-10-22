@@ -31,7 +31,7 @@ namespace IndicoToolkit.Tests
             List<string> acceptedType = new List<string>() {"*.pdf","*.json"};
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir(pathToDir, acceptedType);
-            Assert.Equal(3, fptest.filePaths.Count);
+            Assert.Equal(3, fptest.filePaths.Count());
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace IndicoToolkit.Tests
             List<string> acceptedType = new List<string>() {"*.pdf","*.json"};
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir( pathToDir, acceptedType, false);
-            Assert.Equal(5, fptest.filePaths.Count);
+            Assert.Equal(8, fptest.filePaths.Count());
         }
 
         [Fact]
@@ -51,14 +51,14 @@ namespace IndicoToolkit.Tests
             FileProcessing fptest = new FileProcessing(filePaths);
             List<List<string>> batches = fptest.BatchFiles(2).ToList();
             // assert that we have the right number of batches
-            Assert.Equal(2, batches[0].Count);
-            Assert.True(batches[0].Contains("1"));
-            Assert.True(batches[0].Contains("2"));
-            Assert.Equal(2, batches[1].Count);
-            Assert.True(batches[1].Contains("3"));
-            Assert.True(batches[1].Contains("4"));
-            Assert.Equal(1, batches[2].Count);
-            Assert.True(batches[2].Contains("5"));
+            Assert.Equal(2, batches[0].Count());
+            Assert.Contains("1", batches[0]);
+            Assert.Contains("2", batches[0]);
+            Assert.Equal(2, batches[1].Count());
+            Assert.Contains("3", batches[1]);
+            Assert.Contains("4", batches[1]);
+            Assert.Equal(1, batches[2].Count());
+            Assert.Contains("5", batches[2]);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace IndicoToolkit.Tests
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir(pathToDir, acceptedType);
             List<string> directories = fptest.GetParentDirectoriesOfFilepaths();
-            Assert.Equal(4, directories.Count);
+            Assert.Equal(4, directories.Count());
             foreach(string parent in directories){
                 Assert.Equal("samples", parent);
             }
