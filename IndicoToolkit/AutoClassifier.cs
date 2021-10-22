@@ -33,7 +33,7 @@ namespace IndicoToolkit
 
         /// <summary>OCR filepaths and add full texts to this.FileTexts</summary>
         /// <param name="batchSize">Docs to OCR in parallel.</param>
-        public async Task createClassifier(int batchSize = 5)
+        public async Task setDocumentText(int batchSize = 5)
         {
             DocExtraction docex = new DocExtraction(this.client);
             List<List<string>> batches = this.fp.BatchFiles(batchSize).ToList();
