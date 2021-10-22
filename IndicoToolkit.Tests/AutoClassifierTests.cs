@@ -47,7 +47,7 @@ namespace IndicoToolkit.Tests
         {
             AutoClassifier auto = new AutoClassifier(Utils.client, targetPath);
             auto.setFileStructure();
-            await auto.createClassifier(2);
+            await auto.setDocumentText(2);
             Assert.Equal(1, auto.fileClasses.Where(s=> s == "b").Count());
             Assert.Equal(2, auto.fileClasses.Where(s=> s == "a").Count());
             Assert.Equal(3, auto.fileTexts.Count());
@@ -59,7 +59,7 @@ namespace IndicoToolkit.Tests
         {
             AutoClassifier auto = new AutoClassifier(Utils.client, targetPath);
             auto.setFileStructure();
-            await auto.createClassifier();
+            await auto.setDocumentText();
             string myTempFile = Path.GetTempFileName();
             auto.toCSV(myTempFile);
             int shouldBeTwoAclass = 0;
