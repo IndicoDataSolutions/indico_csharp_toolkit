@@ -30,7 +30,14 @@ namespace IndicoToolkit
             prediction_label_map = new Dictionary<string, List<Prediction>>();
             for (int i = 0; i < preds.Count; i++) 
             {
-                prediction_label_map[preds[i]["label"]].Append(preds[i]);
+                Prediction pred = preds[i];
+                string pred_label = pred.getValue("label");
+
+                if (prediction_label_map.ContainsKey(pred_label)) {
+                    prediction_label_map[pred_label].Append(pred);
+                } else {
+                    prediction_label_map.Add(pred_label, pred);
+                }
             }
             return prediction_label_map;
         }
@@ -50,13 +57,14 @@ namespace IndicoToolkit
         {
             List<Prediction> high_conf_preds = new List<Prediction>();
             for (int i = 0; i < preds.Count; i++) {
-                string label = preds[i]["label"];
-                if (labels != null && !labels.Contains(label)) {
-                    high_conf_preds.Append(preds[i]);
-                } else if (preds[i]["confidence"][label] >= confidence) {
-                    high_conf_preds.Append(preds[i]);
+                Prediction pred = preds[i];
+                string pred_label = pred.getValue("label");
+                if (labels != null && !labels.Contains(pred_label)) {
+                    high_conf_preds.Append(pred);
+                } else if (pred.getValue("confidence")[pred_label] >= confidence) {
+                    high_conf_preds.Append(pred);
                 } else {
-                    removed_predictions.Append(preds[i]);
+                    removed_predictions.Append(pred);
                 }
             }
             preds = high_conf_preds;
@@ -80,7 +88,7 @@ namespace IndicoToolkit
                 Prediction pred = preds[i];
                 for (int j = 0; j < keys_to_remove.Count; j++) {
                     string key = keys[j];
-                    pred.Remove(key);
+                    pred.removeKey(key);
                 }
             }
         }
@@ -93,7 +101,7 @@ namespace IndicoToolkit
             List<Prediction> newPreds = new List<Prediction>();
             for (int i = 0; i < preds.Count; i++) {
                 Prediction pred = preds[i];
-                if (labels.Contains(pred["label"])) {
+                if (labels.Contains(pred.getValue("label"))) {
                     removed_predictions.Append(pred);
                 } else {
                     newPreds.Append(pred);
@@ -122,8 +130,8 @@ namespace IndicoToolkit
         /// </summary>
         public static bool isManuallyAddedPrediction(Prediction prediction)
         {
-            if (prediction["start"] is int && prediction["end"] is int) {
-                if (prediction["end"] > prediction["start"]) {
+            if (prediction.getValue("start") is int && prediction.getValue("end") is int) {
+                if (prediction.getValue("end") > prediction.getValue("start")) {
                     return false;
                 }
             }
