@@ -136,7 +136,7 @@ namespace IndicoToolkit
                 }
             }
             return true;
-        }
+        } 
 
         /// <summary>
         /// Method <c>selectMaxConfidence</c> gets the highest confidence prediction for a given field.
