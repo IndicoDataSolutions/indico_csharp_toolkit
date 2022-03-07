@@ -15,7 +15,7 @@ namespace IndicoToolkit.Tests
     public class AutoClassifierTests 
     {
         static string targetPath = Path.Join(Utils.file_dir, "data/auto_class/");
-        static string badFilesPath = Path.Join(Utils.file_dir, "data/empty/");
+        static string badFilesPath = Path.Join(Utils.file_dir, "data/auto_class/empty/");
         static string badClassPath = Path.Join(Utils.file_dir, "data/auto_class/a/");
         
         [Fact]

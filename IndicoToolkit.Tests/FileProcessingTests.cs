@@ -11,7 +11,7 @@ namespace IndicoToolkit.Tests
         public void TestGetFilePathsFromEmptyDir()
         {
             FileProcessing fptest = new FileProcessing();
-            fptest.GetFilePathsFromDir(Path.Join(Utils.file_dir, "data/empty/"));
+            fptest.GetFilePathsFromDir(Path.Join(Utils.file_dir, "data/auto_class/empty/"));
             Assert.Equal(0, fptest.filePaths.Count);
         }
 
