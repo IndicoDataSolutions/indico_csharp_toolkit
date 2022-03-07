@@ -3,7 +3,6 @@ using IndicoToolkit;
 using IndicoToolkit.Types;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using System.IO;
 
 namespace IndicoToolkit.Tests
 {
