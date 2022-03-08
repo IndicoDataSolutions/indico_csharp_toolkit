@@ -10,21 +10,18 @@ namespace IndicoToolkit.Tests
 {
     public class ExtractionsTests 
     {
-        static string jsonPath = Path.Join(Utils.file_dir, "data/samples/fin_disc_result.json");
-
         [Fact]
         public void TestInit()
         {
-            List<string> fpaths = new List<string>{jsonPath};
-            Console.WriteLine(fpaths);
-            List<Prediction> staticExtractPreds = new List<Prediction>() {
-                new Prediction(JObject.Parse(@"{
-                'Key': 'Value',
-                }")),
-            };
+            dynamic predictions = Utils.LoadJson("data/samples/fin_disc_result.json")["results"]["document"]["results"]["Toolkit Test Financial Model"];
+            List<Prediction> staticExtractPreds = new List<Prediction>();
+            for (int i = 0; i < predictions.Count; i++) {
+                staticExtractPreds.Add(new Prediction(predictions[i]));
+            }
             Extractions extractions = new Extractions(staticExtractPreds);
             Assert.Equal(extractions.Preds(), staticExtractPreds);
-            
+            Assert.Equal(extractions.removed_predictions.Count, 0);
+            Assert.IsType<Prediction>(extractions.Preds()[0]);
         }
 
     }
