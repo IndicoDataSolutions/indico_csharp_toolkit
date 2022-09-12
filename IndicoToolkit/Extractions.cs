@@ -1,10 +1,5 @@
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using Indico;
-using Indico.Jobs;
-using System.Threading.Tasks;
 
 using IndicoToolkit.Types;
 
@@ -14,37 +9,34 @@ namespace IndicoToolkit
     /// Class <c>Extractions</c> provides functionality for common extraction prediction use cases.
     /// </summary>
     public class Extractions {
-        public List<Prediction> preds = new List<Prediction>();
-        public List<Prediction> removed_predictions = new List<Prediction>();
+        public List<Prediction> Preds { get; private set; } 
+        public List<Prediction> RemovedPreds { get; private set; }
         
         public Extractions(List<Prediction> predictions)
         {
-            this.preds = predictions;
+            Preds = predictions;
+            RemovedPreds = new List<Prediction>();
         }
 
-        public List<Prediction> Preds() 
-        {
-            return preds;
-        }
 
         /// <summary>
         /// Method <c>toDictByLabel</c> generates a dictionary where key is label string and value is list of all predictions of that label.
         /// </summary>
         public Dictionary<string, List<Prediction>> toDictByLabel()
         {
-            Dictionary<string, List<Prediction>> prediction_label_map = new Dictionary<string, List<Prediction>>();
-            for (int i = 0; i < preds.Count; i++) 
+            Dictionary<string, List<Prediction>> predictionLabelMap = new Dictionary<string, List<Prediction>>();
+            for (int i = 0; i < Preds.Count; i++) 
             {
-                Prediction pred = preds[i];
-                string pred_label = pred.getValue("label");
+                Prediction pred = Preds[i];
+                string predLabel = pred.getValue("label");
 
-                if (prediction_label_map.ContainsKey(pred_label)) {
-                    prediction_label_map[pred_label].Append(pred);
+                if (predictionLabelMap.ContainsKey(predLabel)) {
+                    predictionLabelMap[predLabel].Append(pred);
                 } else {
-                    prediction_label_map.Add(pred_label, new List<Prediction>() {pred});
+                    predictionLabelMap.Add(predLabel, new List<Prediction>() {pred});
                 }
             }
-            return prediction_label_map;
+            return predictionLabelMap;
         }
         
         /// <summary>
@@ -52,7 +44,7 @@ namespace IndicoToolkit
         /// </summary>
         public int numPredictions() 
         {
-            return preds.Count; 
+            return Preds.Count; 
         }
 
         /// <summary>
@@ -60,19 +52,19 @@ namespace IndicoToolkit
         /// </summary>
         public void removeByConfidence(float confidence = 0.95f, List<string> labels = null) 
         {
-            List<Prediction> high_conf_preds = new List<Prediction>();
-            for (int i = 0; i < preds.Count; i++) {
-                Prediction pred = preds[i];
-                string pred_label = pred.getValue("label");
-                if (labels != null && !labels.Contains(pred_label)) {
-                    high_conf_preds.Append(pred);
-                } else if (pred.getValue("confidence")[pred_label] >= confidence) {
-                    high_conf_preds.Append(pred);
+            List<Prediction> highConfPreds = new List<Prediction>();
+            for (int i = 0; i < Preds.Count; i++) {
+                Prediction pred = Preds[i];
+                string predLabel = pred.getValue("label");
+                if (labels != null && !labels.Contains(predLabel)) {
+                    highConfPreds.Append(pred);
+                } else if (pred.getValue("confidence")[predLabel] >= confidence) {
+                    highConfPreds.Append(pred);
                 } else {
-                    removed_predictions.Append(pred);
+                    RemovedPreds.Append(pred);
                 }
             }
-            preds = high_conf_preds;
+            Preds = highConfPreds;
         }
 
         /// <summary>
@@ -87,15 +79,15 @@ namespace IndicoToolkit
         /// <summary>
         /// Method <c>removeKeys</c> removes specified keys from prediction dictionaries.
         /// </summary>
-        public void removeKeys(List<string> keys_to_remove = default(List<string>))
+        public void removeKeys(List<string> keysToRemove = default(List<string>))
         {
-            if (keys_to_remove == null) {
-                keys_to_remove = new List<string>() {"start", "end"};
+            if (keysToRemove == null) {
+                keysToRemove = new List<string>() {"start", "end"};
             }
-            for (int i = 0; i < preds.Count; i++) {
-                Prediction pred = preds[i];
-                for (int j = 0; j < keys_to_remove.Count; j++) {
-                    string key = keys_to_remove[j];
+            for (int i = 0; i < Preds.Count; i++) {
+                Prediction pred = Preds[i];
+                for (int j = 0; j < keysToRemove.Count; j++) {
+                    string key = keysToRemove[j];
                     pred.removeKey(key);
                 }
             }
@@ -107,15 +99,15 @@ namespace IndicoToolkit
         public void removeAllByLabel(List<string> labels)
         {
             List<Prediction> newPreds = new List<Prediction>();
-            for (int i = 0; i < preds.Count; i++) {
-                Prediction pred = preds[i];
+            for (int i = 0; i < Preds.Count; i++) {
+                Prediction pred = Preds[i];
                 if (labels.Contains(pred.getValue("label"))) {
-                    removed_predictions.Append(pred);
+                    RemovedPreds.Append(pred);
                 } else {
                     newPreds.Append(pred);
                 }
             }
-            preds = newPreds;
+            Preds = newPreds;
         }
 
         /// <summary>
@@ -124,13 +116,13 @@ namespace IndicoToolkit
         public void removeHumanAddedPredictions()
         {
             List<Prediction> newPreds = new List<Prediction>();
-            for (int i = 0; i < preds.Count; i++) {
-                Prediction pred = preds[i];
+            for (int i = 0; i < Preds.Count; i++) {
+                Prediction pred = Preds[i];
                 if (!isManuallyAddedPrediction(pred)) {
                     newPreds.Append(pred);
                 }
             }
-            preds = newPreds;
+            Preds = newPreds;
         }
 
         /// <summary>
