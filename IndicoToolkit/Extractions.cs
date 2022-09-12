@@ -14,7 +14,7 @@ namespace IndicoToolkit
     /// Class <c>Extractions</c> provides functionality for common extraction prediction use cases.
     /// </summary>
     public class Extractions {
-        internal List<Prediction> preds = new List<Prediction>();
+        public List<Prediction> preds = new List<Prediction>();
         public List<Prediction> removed_predictions = new List<Prediction>();
         
         public Extractions(List<Prediction> predictions)
