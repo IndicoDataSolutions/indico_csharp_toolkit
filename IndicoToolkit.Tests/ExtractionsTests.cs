@@ -43,9 +43,9 @@ namespace IndicoToolkit.Tests
         [Fact]
         public void TestInit()
         {
-            Assert.Equal(fixture.ExtractionsObject.getPreds(), fixture.Predictions);
-            Assert.Equal(fixture.ExtractionsObject.removedPredictions.Count, 0);
-            Assert.IsType<Prediction>(fixture.ExtractionsObject.getPreds()[0]);
+            Assert.Equal(fixture.ExtractionsObject.preds, fixture.Predictions);
+            Assert.Equal(fixture.ExtractionsObject.removed_predictions.Count, 0);
+            Assert.IsType<Prediction>(fixture.ExtractionsObject.preds[0]);
         }
 
         [Fact]
@@ -59,8 +59,8 @@ namespace IndicoToolkit.Tests
             List<string> labels = new List<string>(){"Name", "Department"};
             extractionsObject.removeByConfidence(0.95f, labels);
             extractionsObject.removeByConfidence(0.9f);
-            for (int i = 0; i < extractionsObject.getPreds().Count; i++) {
-                Prediction pred = extractionsObject.getPreds()[i];
+            for (int i = 0; i < extractionsObject.preds.Count; i++) {
+                Prediction pred = extractionsObject.preds[i];
                 string pred_label = pred.getValue("label");
                 if (labels.Contains(pred_label)) {
                     Assert.True(pred.getValue("confidence")[pred_label] > 0.95f);
