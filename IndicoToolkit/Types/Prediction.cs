@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
@@ -15,6 +16,16 @@ namespace IndicoToolkit.Types
         public dynamic getValue(string key)
         {
             return prediction[key];
+        }
+
+        public void setValue(string key, JToken value)
+        {
+            prediction[key] = value;
+        }
+
+        public string getLabel()
+        {
+            return (string) prediction["label"];
         }
 
         public void removeKey(string key)

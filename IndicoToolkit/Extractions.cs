@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 using IndicoToolkit.Types;
 
@@ -11,13 +12,29 @@ namespace IndicoToolkit
     public class Extractions {
         public List<Prediction> Preds { get; private set; } 
         public List<Prediction> RemovedPreds { get; private set; }
+        public Dictionary<string, List<Prediction>> PredictionLabelMap { get; private set; }
+        public HashSet<string> LabelSet { get; private set; }
         
         public Extractions(List<Prediction> predictions)
         {
             Preds = predictions;
             RemovedPreds = new List<Prediction>();
+            PredictionLabelMap = toDictByLabel();
+            LabelSet = getLabelSet(predictions);
         }
 
+        /// <summary>
+        /// Get the included labels from a list of predictions
+        /// </summary>
+        private HashSet<string> getLabelSet(List<Prediction> predictions)
+        {
+            HashSet<string> labelSet = new HashSet<string>();
+            for (int i = 0; i < predictions.Count; i++)
+            {
+                labelSet.Add(predictions[i].getLabel());
+            }
+            return labelSet;
+        }
 
         /// <summary>
         /// Method <c>toDictByLabel</c> generates a dictionary where key is label string and value is list of all predictions of that label.
@@ -49,6 +66,8 @@ namespace IndicoToolkit
 
         /// <summary>
         /// Method <c>removeByConfidence</c> removes predictions that are less than given confidence.
+        /// <param name="confidence"> Confidence threshold. Defaults to 0.95f. </param>
+        /// <param name="labels"> Labels where this applies. If null, applies to all. Defaults to null. </param>
         /// </summary>
         public void removeByConfidence(float confidence = 0.95f, List<string> labels = null) 
         {
@@ -72,8 +91,44 @@ namespace IndicoToolkit
         /// </summary>
         public void removeExceptMaxConfidence(List<string> labels) 
         {
-            /* TODO */
-            return ;
+            for (int i = 0; i < labels.Count; i++)
+            {
+                string label = labels[i];
+                if (LabelSet.Contains(label)) 
+                {
+                    Prediction maxPred = selectMaxConfidence(label);
+                    List<string> labelList = new List<string>(){ label };
+                    removeAllByLabel(labelList);
+                    RemovedPreds.Remove(maxPred);
+                    Preds.Add(maxPred);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overwrite confidence dictionary to just max confidence float to make preds more readable.
+        /// </summary>
+        public List<Prediction> setConfidenceKeyToMaxValue(bool inplace = true)
+        {
+            if (inplace)
+            {
+                return SetConfidenceKeyToMaxValue(Preds);
+            } 
+            else 
+            {
+                return SetConfidenceKeyToMaxValue(Preds.CloneList());
+            }
+        }
+
+        private static List<Prediction> SetConfidenceKeyToMaxValue(List<Prediction> preds)
+        {
+            for (int i = 0; i < preds.Count; i++)
+            {
+                Prediction pred = preds[i];
+                float maxConfidence = pred.getValue("confidence").Get(pred.getLabel());
+                pred.setValue("confidence", (JToken) maxConfidence);
+            }
+            return preds;
         }
         
         /// <summary>
@@ -141,9 +196,71 @@ namespace IndicoToolkit
         /// <summary>
         /// Method <c>selectMaxConfidence</c> gets the highest confidence prediction for a given field.
         /// </summary>
-        internal Prediction selectMaxConfidence(string label) {
-            /* TODO */
-            return null;
+        private Prediction selectMaxConfidence(string label) {
+            Prediction maxPred = null;
+            float confidence = 0f;
+            List<Prediction> preds = PredictionLabelMap[label];
+            for (int i = 0; i < preds.Count; i++)
+            {
+                Prediction pred = preds[i];
+                float predConfidence = pred.getValue("confidence").Get(label);
+                if (predConfidence >= confidence)
+                {
+                    maxPred = pred;
+                    confidence = predConfidence;
+                }
+            }
+            return maxPred;
+        }
+
+        /// <summary>
+        /// Get count of occurrences of each label
+        /// </summary>
+        public Dictionary<string, int> labelCountDict()
+        {
+            Dictionary<string, int> countDict = new Dictionary<string, int>();
+            foreach (var label in LabelSet)
+            {
+                int count = PredictionLabelMap[label].Count;
+                countDict[label] = count;
+            }
+            return countDict;
+        }
+
+        /// <summary>
+        /// Check whether there are multiple unique text values for field
+        /// </summary>
+        public bool existMultipleValsForLabel(string label)
+        {
+            int count = PredictionLabelMap[label].Distinct().ToList().Count;
+            if (count > 1) 
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Return the most common text value. If there is a tie- returns null;
+        /// </summary>
+        public string getMostCommonTextValue(string label)
+        {
+            List<Prediction> predictions = PredictionLabelMap[label];
+            Dictionary<string, int> textToCount = new Dictionary<string, int>();
+            for (int i = 0; i < predictions.Count; i++)
+            {
+                string text = predictions[i].getValue("text");
+                if (textToCount.ContainsKey(text))
+                {
+                    textToCount[text] += 1;
+                }
+                else 
+                {
+                    textToCount[text] = 1;
+                }
+            }
+            var mostCommonText = textToCount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+            return mostCommonText;
         }
 
         /// <summary>
