@@ -67,5 +67,17 @@ namespace IndicoToolkit.Tests
             }
         }
 
+        [Fact]
+        public void TestGetMostCommonTextValue()
+        {
+            List<Prediction> predictions = new List<Prediction>();
+            predictions.Add(CreatePrediction(text="this"));
+            predictions.Add(CreatePrediction(text="this"));
+            predictions.Add(CreatePrediction(text="not this"));
+            Extractions extractionsObject = new Extractions(predictions);
+            string mostCommonTextValue = extractionsObject.getMostCommonTextValue("testLabel");
+            Assert.Equal(mostCommonTextValue, "this");
+        }
+
     }
 }

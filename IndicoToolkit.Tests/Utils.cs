@@ -24,5 +24,26 @@ namespace IndicoToolkit.Tests
                 return obj;
             }
         }
+
+        public static dynamic CreatePrediction(
+            int start = 0,
+            int end = 10,
+            string label = "testLabel",
+            string text = "text",
+            JObject confidence = new JObject.Parse(@"{
+                'testLabel' : .9,
+            }")
+        )
+        {
+            JObject val = new JObject.Parse($@"{
+                "start": {{start}},
+                'end': {{end}},
+                'label': {{label}},
+                'text': {{text}},
+                'confidence': {{confidence}}
+            }");
+            Prediction prediction = new Prediction(val);
+            return prediction;
+        }
     }
 }
