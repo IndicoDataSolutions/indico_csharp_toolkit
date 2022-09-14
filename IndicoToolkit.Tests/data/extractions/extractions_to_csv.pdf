@@ -1,0 +1,4 @@
+label,text,confidence
+testLabel,A,0.9
+label,text,confidence
+testLabel,B,0.9

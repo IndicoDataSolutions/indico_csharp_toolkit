@@ -1,7 +1,13 @@
 using Xunit;
 using IndicoToolkit.Types;
 using System;
+using System.IO;
+using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Globalization;
+using Newtonsoft.Json.Linq;
+using CsvHelper;
 
 namespace IndicoToolkit.Tests
 {
@@ -68,15 +74,62 @@ namespace IndicoToolkit.Tests
         }
 
         [Fact]
+        public void TestRemoveExceptMaxConfidence()
+        {
+            List<Prediction> predictions = new List<Prediction>();
+            JObject newConfidence = new JObject{
+                { "testLabel", .99f }
+            };
+            predictions.Add(Utils.CreatePrediction(text:"keep this", confidence: newConfidence));
+            predictions.Add(Utils.CreatePrediction(text:"remove this"));
+            Extractions extractionsObject = new Extractions(predictions);
+            extractionsObject.removeExceptMaxConfidence(new List<string>(){"testLabel"});
+            Assert.Equal(extractionsObject.Preds.Count, 1);
+            Assert.Equal(extractionsObject.RemovedPreds.Count, 1);
+            Assert.Equal((string)extractionsObject.Preds[0].getValue("text"), "keep this");
+            Assert.Equal((string)extractionsObject.RemovedPreds[0].getValue("text"), "remove this");
+        }
+
+        [Fact]
+        public void TestExistMultipleValsForLabel()
+        {
+            List<Prediction> predictions = new List<Prediction>();
+            predictions.Add(Utils.CreatePrediction(text:"A"));
+            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(label: "otherLabel", text: "C"));
+            Extractions extractionsObject = new Extractions(predictions);
+            Assert.True(extractionsObject.existMultipleValsForLabel("testLabel"));
+            Assert.False(extractionsObject.existMultipleValsForLabel("otherLabel"));
+        }
+
+        [Fact]
         public void TestGetMostCommonTextValue()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(CreatePrediction(text="this"));
-            predictions.Add(CreatePrediction(text="this"));
-            predictions.Add(CreatePrediction(text="not this"));
+            predictions.Add(Utils.CreatePrediction(text:"this"));
+            predictions.Add(Utils.CreatePrediction(text:"this"));
+            predictions.Add(Utils.CreatePrediction(text:"not this"));
             Extractions extractionsObject = new Extractions(predictions);
             string mostCommonTextValue = extractionsObject.getMostCommonTextValue("testLabel");
             Assert.Equal(mostCommonTextValue, "this");
+        }
+
+        [Fact]
+        public void TestToCSV()
+        {
+            List<Prediction> predictions = new List<Prediction>();
+            predictions.Add(Utils.CreatePrediction(text:"A"));
+            predictions.Add(Utils.CreatePrediction(text:"B"));
+            string savePath = Path.Join(Utils.file_dir, "data/extractions/");
+            string fileName = "extractions_to_csv.pdf";
+            Extractions extractionsObject = new Extractions(predictions);
+            extractionsObject.toCSV(savePath: savePath, fileName: fileName);
+            using (var reader = new StreamReader(savePath + fileName))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                List<ExtractionRecord> records = csv.GetRecords<ExtractionRecord>().ToList();
+                Assert.Equal(3, records.Count);
+            }
         }
 
     }

@@ -4,6 +4,7 @@ using System.IO;
 using Indico;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using IndicoToolkit.Types;
 
 namespace IndicoToolkit.Tests
 {
@@ -30,18 +31,25 @@ namespace IndicoToolkit.Tests
             int end = 10,
             string label = "testLabel",
             string text = "text",
-            JObject confidence = new JObject.Parse(@"{
-                'testLabel' : .9,
-            }")
+            JObject confidence = null
         )
         {
-            JObject val = new JObject.Parse($@"{
-                "start": {{start}},
-                'end': {{end}},
-                'label': {{label}},
-                'text': {{text}},
-                'confidence': {{confidence}}
-            }");
+            JObject val = new JObject();
+            val.Add("start", start);
+            val.Add("end", end);
+            val.Add("label", label);
+            val.Add("text", text);
+            if (confidence == null)
+            {
+                JObject newConfidence = new JObject{
+                    {"testLabel", .9f}
+                };
+                val.Add("confidence", newConfidence);
+            } 
+            else 
+            {
+                val.Add("confidence", confidence);
+            }
             Prediction prediction = new Prediction(val);
             return prediction;
         }
