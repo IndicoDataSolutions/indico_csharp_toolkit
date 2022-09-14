@@ -121,14 +121,36 @@ namespace IndicoToolkit.Tests
             predictions.Add(Utils.CreatePrediction(text:"A"));
             predictions.Add(Utils.CreatePrediction(text:"B"));
             string savePath = Path.Join(Utils.file_dir, "data/extractions/");
-            string fileName = "extractions_to_csv.pdf";
             Extractions extractionsObject = new Extractions(predictions);
+            string fileName = "extractions.csv";
             extractionsObject.toCSV(savePath: savePath, fileName: fileName);
             using (var reader = new StreamReader(savePath + fileName))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
                 List<ExtractionRecord> records = csv.GetRecords<ExtractionRecord>().ToList();
-                Assert.Equal(3, records.Count);
+                Assert.Equal(2, records.Count);
+                int numColumns = csv.HeaderRecord.Count();
+                Assert.Equal(3, numColumns);
+            }
+        }
+
+        [Fact]
+        public void TestToCSVIncludeStartEnd()
+        {
+            List<Prediction> predictions = new List<Prediction>();
+            predictions.Add(Utils.CreatePrediction(text:"A"));
+            predictions.Add(Utils.CreatePrediction(text:"B"));
+            string savePath = Path.Join(Utils.file_dir, "data/extractions/");
+            Extractions extractionsObject = new Extractions(predictions);
+            string fileName = "extractions_include_start_end.csv";
+            extractionsObject.toCSV(savePath: savePath, fileName: fileName, includeStartEnd: true);
+            using (var reader = new StreamReader(savePath + fileName))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                List<FullExtractionRecord> records = csv.GetRecords<FullExtractionRecord>().ToList();
+                Assert.Equal(2, records.Count);
+                int numColumns = csv.HeaderRecord.Count();
+                Assert.Equal(5, numColumns);
             }
         }
 

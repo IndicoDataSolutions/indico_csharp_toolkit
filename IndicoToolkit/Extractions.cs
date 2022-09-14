@@ -1,9 +1,11 @@
 using System;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Globalization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using CsvHelper;
 
@@ -279,38 +281,46 @@ namespace IndicoToolkit
         /// </summary>
         public void toCSV(string savePath, string fileName = "", bool appendIfExists = true, bool includeStartEnd = false) {
             List<Prediction> preds = setConfidenceKeyToMaxValue(true);
-            using (var writer = new StreamWriter(savePath + fileName))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            string json = "";
+            if (!includeStartEnd)
             {
+                var ExtractionRecords = new List<ExtractionRecord>();
                 for (int i = 0; i < preds.Count; i++)
                 {
                     Prediction pred = preds[i];
-                    if (!includeStartEnd) 
-                    {
-                        csv.WriteHeader<ExtractionRecord>();
-                        csv.NextRecord();
-                        ExtractionRecord rec = new ExtractionRecord{
-                            label=pred.getLabel(), 
-                            text=pred.getValue("text"), 
-                            confidence=pred.getValue("confidence")
-                        };
-                        csv.WriteRecord(rec);
-                        csv.NextRecord();
-                    }
-                    else
-                    {
-                        csv.WriteHeader<FullExtractionRecord>();
-                        FullExtractionRecord rec = new FullExtractionRecord{
-                            start=pred.getValue("start"), 
-                            end=pred.getValue("end"), 
-                            label=pred.getLabel(),
-                            text=pred.getValue("text"),
-                            confidence=pred.getValue("confidence")
-                        };
-                        csv.WriteRecord(rec);
-                        csv.NextRecord();
-                    }
+                    ExtractionRecords.Add(new ExtractionRecord {
+                        label = pred.getLabel(),
+                        text = pred.getValue("text"),
+                        confidence = pred.getValue("confidence")
+                    });
                 }
+                json = JsonConvert.SerializeObject(ExtractionRecords, Formatting.Indented);
+            } 
+            else 
+            {
+                var FullExtractionRecords = new List<FullExtractionRecord>();
+                for (int i = 0; i < preds.Count; i++)
+                {
+                    Prediction pred = preds[i];
+                    FullExtractionRecords.Add(new FullExtractionRecord {
+                        start = pred.getValue("start"),
+                        end = pred.getValue("end"),
+                        label = pred.getLabel(),
+                        text = pred.getValue("text"),
+                        confidence = pred.getValue("confidence")
+                    });
+                }
+                json = JsonConvert.SerializeObject(FullExtractionRecords, Formatting.Indented);
+            }
+            var expandos = JsonConvert.DeserializeObject<ExpandoObject[]>(json);
+
+            using (var writer = new StringWriter())
+            {
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(expandos as IEnumerable<dynamic>);
+                }
+                File.WriteAllText(savePath + fileName, writer.ToString());
             }
         }
         
