@@ -32,6 +32,12 @@ namespace IndicoToolkit.Types
         {
             prediction.Remove(key);
         }
+
+
+        public dynamic getSpecialValue(string key)
+        {
+            return prediction.SelectToken(key);
+        }
     }
 
     

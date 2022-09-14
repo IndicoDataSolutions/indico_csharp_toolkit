@@ -1,6 +1,11 @@
+using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Globalization;
 using Newtonsoft.Json.Linq;
+using CsvHelper;
 
 using IndicoToolkit.Types;
 
@@ -48,7 +53,7 @@ namespace IndicoToolkit
                 string predLabel = pred.getValue("label");
 
                 if (predictionLabelMap.ContainsKey(predLabel)) {
-                    predictionLabelMap[predLabel].Append(pred);
+                    predictionLabelMap[predLabel].Add(pred);
                 } else {
                     predictionLabelMap.Add(predLabel, new List<Prediction>() {pred});
                 }
@@ -76,11 +81,11 @@ namespace IndicoToolkit
                 Prediction pred = Preds[i];
                 string predLabel = pred.getValue("label");
                 if (labels != null && !labels.Contains(predLabel)) {
-                    highConfPreds.Append(pred);
+                    highConfPreds.Add(pred);
                 } else if (pred.getValue("confidence")[predLabel] >= confidence) {
-                    highConfPreds.Append(pred);
+                    highConfPreds.Add(pred);
                 } else {
-                    RemovedPreds.Append(pred);
+                    RemovedPreds.Add(pred);
                 }
             }
             Preds = highConfPreds;
@@ -108,6 +113,7 @@ namespace IndicoToolkit
         /// <summary>
         /// Overwrite confidence dictionary to just max confidence float to make preds more readable.
         /// </summary>
+        /// NOTE: Deep cloning is currently broken.
         public List<Prediction> setConfidenceKeyToMaxValue(bool inplace = true)
         {
             if (inplace)
@@ -125,7 +131,7 @@ namespace IndicoToolkit
             for (int i = 0; i < preds.Count; i++)
             {
                 Prediction pred = preds[i];
-                float maxConfidence = pred.getValue("confidence").Get(pred.getLabel());
+                float maxConfidence = pred.getValue("confidence")[pred.getLabel()];
                 pred.setValue("confidence", (JToken) maxConfidence);
             }
             return preds;
@@ -156,10 +162,10 @@ namespace IndicoToolkit
             List<Prediction> newPreds = new List<Prediction>();
             for (int i = 0; i < Preds.Count; i++) {
                 Prediction pred = Preds[i];
-                if (labels.Contains(pred.getValue("label"))) {
-                    RemovedPreds.Append(pred);
+                if (labels.Contains((string) pred.getValue("label"))) {
+                    RemovedPreds.Add(pred);
                 } else {
-                    newPreds.Append(pred);
+                    newPreds.Add(pred);
                 }
             }
             Preds = newPreds;
@@ -174,7 +180,7 @@ namespace IndicoToolkit
             for (int i = 0; i < Preds.Count; i++) {
                 Prediction pred = Preds[i];
                 if (!isManuallyAddedPrediction(pred)) {
-                    newPreds.Append(pred);
+                    newPreds.Add(pred);
                 }
             }
             Preds = newPreds;
@@ -203,7 +209,8 @@ namespace IndicoToolkit
             for (int i = 0; i < preds.Count; i++)
             {
                 Prediction pred = preds[i];
-                float predConfidence = pred.getValue("confidence").Get(label);
+                string predLabel = pred.getLabel();
+                float predConfidence = pred.getSpecialValue($"confidence.{predLabel}");
                 if (predConfidence >= confidence)
                 {
                     maxPred = pred;
@@ -265,10 +272,46 @@ namespace IndicoToolkit
 
         /// <summary>
         /// Method <c>toCSV</c> writes three column CSV ('confidence', 'label', 'text')
+        /// <param name="savePath"> Path to write CSV </param>
+        /// <param name="fileName"> The file where the preds were derived from. Defaults to "". </param>
+        /// <param name="appendIfExists"> If path exists, append to that CSV. Defaults to true. </param>
+        /// <param name="includeStartEnd"> Include columns for start/end indexes. Defaults to false. </param>
         /// </summary>
-        public void toCSV(string save_path, string filename = "", bool append_if_exists = true, bool include_start_end = false) {
-            /* TODO */
-            return ;
+        public void toCSV(string savePath, string fileName = "", bool appendIfExists = true, bool includeStartEnd = false) {
+            List<Prediction> preds = setConfidenceKeyToMaxValue(true);
+            using (var writer = new StreamWriter(savePath + fileName))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                for (int i = 0; i < preds.Count; i++)
+                {
+                    Prediction pred = preds[i];
+                    if (!includeStartEnd) 
+                    {
+                        csv.WriteHeader<ExtractionRecord>();
+                        csv.NextRecord();
+                        ExtractionRecord rec = new ExtractionRecord{
+                            label=pred.getLabel(), 
+                            text=pred.getValue("text"), 
+                            confidence=pred.getValue("confidence")
+                        };
+                        csv.WriteRecord(rec);
+                        csv.NextRecord();
+                    }
+                    else
+                    {
+                        csv.WriteHeader<FullExtractionRecord>();
+                        FullExtractionRecord rec = new FullExtractionRecord{
+                            start=pred.getValue("start"), 
+                            end=pred.getValue("end"), 
+                            label=pred.getLabel(),
+                            text=pred.getValue("text"),
+                            confidence=pred.getValue("confidence")
+                        };
+                        csv.WriteRecord(rec);
+                        csv.NextRecord();
+                    }
+                }
+            }
         }
         
     }
