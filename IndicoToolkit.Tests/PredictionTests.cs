@@ -19,6 +19,17 @@ namespace IndicoToolkit.Tests
         }
 
         [Fact]
+        public void TestSetValue()
+        {
+            JObject val = JObject.Parse(@"{
+                'Key': 'Value',
+            }");
+            Prediction prediction = new Prediction(val);
+            prediction.setValue("Key", (JToken) "NewValue");
+            Assert.Equal((string) prediction.getValue("Key"), "NewValue");
+        }
+
+        [Fact]
         public void TestRemoveKey()
         {
             JObject val = JObject.Parse(@"{
