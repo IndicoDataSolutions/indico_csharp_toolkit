@@ -1,20 +1,26 @@
+using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace IndicoToolkit.Types
 {
-    public class FullExtractionRecord
-    {
-        public string start { get; set; }
-        public string end { get; set; }
-        public string label { get; set; }
-        public string text { get; set; }
-        public string confidence { get; set; }
-    }
-
     public class ExtractionRecord
     {
-        public string label { get; set; }
-        public string text { get; set; }
-        public string confidence { get; set; }
+        public string? Start { get; set; }
+        public string? End { get; set; }
+        public string Label { get; set; }
+        public string Text { get; set; }
+        public string Confidence { get; set; }
+
+        public bool ShouldSerializeStart()
+        {
+            return (Start != null);
+        }
+
+        public bool ShouldSerializeEnd()
+        {
+            return (End != null);
+        }
     }
 }

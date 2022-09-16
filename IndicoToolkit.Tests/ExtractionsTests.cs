@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Newtonsoft.Json.Linq;
 using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace IndicoToolkit.Tests
 {
@@ -153,13 +154,16 @@ namespace IndicoToolkit.Tests
             Extractions extractionsObject = new Extractions(predictions);
             string fileName = "extractions.csv";
             extractionsObject.toCSV(savePath: savePath, fileName: fileName);
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                MissingFieldFound = null,
+                HasHeaderRecord = false
+            };
             using (var reader = new StreamReader(savePath + fileName))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            using (var csv = new CsvReader(reader, config))
             {
                 List<ExtractionRecord> records = csv.GetRecords<ExtractionRecord>().ToList();
-                Assert.Equal(2, records.Count);
-                int numColumns = csv.HeaderRecord.Count();
-                Assert.Equal(3, numColumns);
+                Assert.Equal(3, records.Count);
             }
         }
 
@@ -176,7 +180,7 @@ namespace IndicoToolkit.Tests
             using (var reader = new StreamReader(savePath + fileName))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                List<FullExtractionRecord> records = csv.GetRecords<FullExtractionRecord>().ToList();
+                List<ExtractionRecord> records = csv.GetRecords<ExtractionRecord>().ToList();
                 Assert.Equal(2, records.Count);
                 int numColumns = csv.HeaderRecord.Count();
                 Assert.Equal(5, numColumns);

@@ -120,7 +120,7 @@ namespace IndicoToolkit
             List<Prediction> clone = new List<Prediction>();
             foreach (Prediction pred in preds)
             {
-                JObject predVal = (JObject) pred.prediction.DeepClone();
+                JObject predVal = (JObject) pred.PredictionValue.DeepClone();
                 clone.Add(new Prediction(predVal));
             }
             return clone;
@@ -226,7 +226,7 @@ namespace IndicoToolkit
             {
                 Prediction pred = preds[i];
                 string predLabel = pred.getLabel();
-                float predConfidence = pred.getSpecialValue($"confidence.{predLabel}");
+                float predConfidence = pred.getValue($"confidence.{predLabel}");
                 if (predConfidence >= confidence)
                 {
                     maxPred = pred;
@@ -294,38 +294,20 @@ namespace IndicoToolkit
         /// <param name="includeStartEnd"> Include columns for start/end indexes. Defaults to false. </param>
         /// </summary>
         public void toCSV(string savePath, string fileName = "", bool includeStartEnd = false) {
-            List<Prediction> preds = setConfidenceKeyToMaxValue(includeStartEnd);
-            string json = "";
-            if (!includeStartEnd)
+            List<Prediction> preds = setConfidenceKeyToMaxValue(inplace : false);
+            List<ExtractionRecord> ExtractionRecords = new List<ExtractionRecord>();
+            for (int i = 0; i < preds.Count; i++)
             {
-                var ExtractionRecords = new List<ExtractionRecord>();
-                for (int i = 0; i < preds.Count; i++)
-                {
-                    Prediction pred = preds[i];
-                    ExtractionRecords.Add(new ExtractionRecord {
-                        label = pred.getLabel(),
-                        text = pred.getValue("text"),
-                        confidence = pred.getValue("confidence")
-                    });
-                }
-                json = JsonConvert.SerializeObject(ExtractionRecords, Formatting.Indented);
-            } 
-            else 
-            {
-                var FullExtractionRecords = new List<FullExtractionRecord>();
-                for (int i = 0; i < preds.Count; i++)
-                {
-                    Prediction pred = preds[i];
-                    FullExtractionRecords.Add(new FullExtractionRecord {
-                        start = pred.getValue("start"),
-                        end = pred.getValue("end"),
-                        label = pred.getLabel(),
-                        text = pred.getValue("text"),
-                        confidence = pred.getValue("confidence")
-                    });
-                }
-                json = JsonConvert.SerializeObject(FullExtractionRecords, Formatting.Indented);
+                Prediction pred = preds[i];
+                ExtractionRecords.Add(new ExtractionRecord {
+                    Start = includeStartEnd ? pred.getValue("start") : null,
+                    End = includeStartEnd ? pred.getValue("end") : null,
+                    Label = pred.getLabel(),
+                    Text = pred.getValue("text"),
+                    Confidence = pred.getValue("confidence")
+                });
             }
+            string json = JsonConvert.SerializeObject(ExtractionRecords, Formatting.Indented);
             var expandos = JsonConvert.DeserializeObject<ExpandoObject[]>(json);
 
             using (var writer = new StringWriter())

@@ -6,42 +6,33 @@ namespace IndicoToolkit.Types
 {
     public class Prediction
     {
-        public JObject prediction;
+        private readonly JObject predictionValue;
 
-        public Prediction(JObject val)
-        {
-            this.prediction = val;
-        }
+        public JObject PredictionValue { get { return predictionValue; } }
 
-        public dynamic getPrediction()
+        public Prediction(JObject _predictionValue)
         {
-            return prediction;
+            this.predictionValue = _predictionValue;
         }
 
         public dynamic getValue(string key)
         {
-            return prediction[key];
+            return predictionValue.SelectToken(key);
         }
 
-        public void setValue(string key, JToken value)
+        public void setValue(string key, JToken newValue)
         {
-            prediction[key] = value;
+            predictionValue[key] = newValue;
         }
 
         public string getLabel()
         {
-            return (string) prediction["label"];
+            return (string) predictionValue["label"];
         }
 
         public void removeKey(string key)
         {
-            prediction.Remove(key);
-        }
-
-
-        public dynamic getSpecialValue(string key)
-        {
-            return prediction.SelectToken(key);
+            predictionValue.Remove(key);
         }
     }
 
