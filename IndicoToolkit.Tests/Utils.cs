@@ -26,6 +26,16 @@ namespace IndicoToolkit.Tests
             }
         }
 
+        public static JObject CreateNewConfidence(
+            string label,
+            float newConfidence
+        )
+        {
+            return new JObject {
+                { label, newConfidence}
+            };
+        }
+
         public static dynamic CreatePrediction(
             int start = 0,
             int end = 10,

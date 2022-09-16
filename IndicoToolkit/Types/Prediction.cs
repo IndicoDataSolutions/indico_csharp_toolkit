@@ -6,11 +6,16 @@ namespace IndicoToolkit.Types
 {
     public class Prediction
     {
-        internal JObject prediction;
+        public JObject prediction;
 
         public Prediction(JObject val)
         {
             this.prediction = val;
+        }
+
+        public dynamic getPrediction()
+        {
+            return prediction;
         }
 
         public dynamic getValue(string key)

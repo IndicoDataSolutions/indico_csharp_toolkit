@@ -113,6 +113,20 @@ namespace IndicoToolkit
         }
 
         /// <summary>
+        /// Creates deep copy of list of predictions.
+        /// </summary>
+        private List<Prediction> DeepCopyPredictions(List<Prediction> preds)
+        {
+            List<Prediction> clone = new List<Prediction>();
+            foreach (Prediction pred in preds)
+            {
+                JObject predVal = (JObject) pred.prediction.DeepClone();
+                clone.Add(new Prediction(predVal));
+            }
+            return clone;
+        }
+        
+        /// <summary>
         /// Overwrite confidence dictionary to just max confidence float to make preds more readable.
         /// </summary>
         /// NOTE: Deep cloning is currently broken.
@@ -124,7 +138,7 @@ namespace IndicoToolkit
             } 
             else 
             {
-                return SetConfidenceKeyToMaxValue(Preds.CloneList());
+                return SetConfidenceKeyToMaxValue(DeepCopyPredictions(Preds));
             }
         }
 
@@ -174,9 +188,9 @@ namespace IndicoToolkit
         }
 
         /// <summary>
-        /// Method <c>removeHumanAddedPredictions</c> removes predictions that were not added by the model (i.e. added by scripted or human review).
+        /// Method <c>removeNonIndexedPrediction</c> removes predictions that don't have position indexes.
         /// </summary>
-        public void removeHumanAddedPredictions()
+        public void removeNonIndexedPredictions()
         {
             List<Prediction> newPreds = new List<Prediction>();
             for (int i = 0; i < Preds.Count; i++) {
@@ -204,7 +218,7 @@ namespace IndicoToolkit
         /// <summary>
         /// Method <c>selectMaxConfidence</c> gets the highest confidence prediction for a given field.
         /// </summary>
-        private Prediction selectMaxConfidence(string label) {
+        public Prediction selectMaxConfidence(string label) {
             Prediction maxPred = null;
             float confidence = 0f;
             List<Prediction> preds = PredictionLabelMap[label];
@@ -223,26 +237,20 @@ namespace IndicoToolkit
         }
 
         /// <summary>
-        /// Get count of occurrences of each label
-        /// </summary>
-        public Dictionary<string, int> labelCountDict()
-        {
-            Dictionary<string, int> countDict = new Dictionary<string, int>();
-            foreach (var label in LabelSet)
-            {
-                int count = PredictionLabelMap[label].Count;
-                countDict[label] = count;
-            }
-            return countDict;
-        }
-
-        /// <summary>
         /// Check whether there are multiple unique text values for field
         /// </summary>
         public bool existMultipleValsForLabel(string label)
         {
-            int count = PredictionLabelMap[label].Distinct().ToList().Count;
-            if (count > 1) 
+            List<Prediction> preds = PredictionLabelMap[label];
+            List<string> predictionTextValues = new List<string>();
+            foreach (Prediction pred in preds)
+            {
+                if (!predictionTextValues.Contains((string) pred.getValue("text")))
+                {
+                    predictionTextValues.Add((string) pred.getValue("text"));
+                }
+            }
+            if (predictionTextValues.Count > 1) 
             {
                 return true;
             }
@@ -268,7 +276,14 @@ namespace IndicoToolkit
                     textToCount[text] = 1;
                 }
             }
-            var mostCommonText = textToCount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+            string mostCommonText = textToCount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+            int mostCommonTextCount = textToCount[mostCommonText];
+            int count = textToCount.Values.Where(x => x.Equals(mostCommonTextCount)).Count();
+            /// Check for ties
+            if (count > 1)
+            {
+                return null;
+            } 
             return mostCommonText;
         }
 
@@ -276,11 +291,10 @@ namespace IndicoToolkit
         /// Method <c>toCSV</c> writes three column CSV ('confidence', 'label', 'text')
         /// <param name="savePath"> Path to write CSV </param>
         /// <param name="fileName"> The file where the preds were derived from. Defaults to "". </param>
-        /// <param name="appendIfExists"> If path exists, append to that CSV. Defaults to true. </param>
         /// <param name="includeStartEnd"> Include columns for start/end indexes. Defaults to false. </param>
         /// </summary>
-        public void toCSV(string savePath, string fileName = "", bool appendIfExists = true, bool includeStartEnd = false) {
-            List<Prediction> preds = setConfidenceKeyToMaxValue(true);
+        public void toCSV(string savePath, string fileName = "", bool includeStartEnd = false) {
+            List<Prediction> preds = setConfidenceKeyToMaxValue(includeStartEnd);
             string json = "";
             if (!includeStartEnd)
             {
