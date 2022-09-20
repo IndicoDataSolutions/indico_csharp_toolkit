@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using Indico;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using IndicoToolkit.Types;
 

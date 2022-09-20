@@ -4,13 +4,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Globalization;
-using Newtonsoft.Json.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
-
-using IndicoToolkit.Types;
 
 namespace IndicoToolkit.Tests
 {
