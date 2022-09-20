@@ -62,5 +62,30 @@ namespace IndicoToolkit.Tests
             Prediction prediction = new Prediction(val);
             return prediction;
         }
+
+        public static Position createPosition(
+            int top = 1,
+            int bottom = 10,
+            int left = 5,
+            int right = 15,
+            float bbTop = 1f,
+            float bbBot = 10f,
+            float bbLeft = 5f,
+            float bbRight = 15f,
+            int pageNum = 0
+        )
+        {
+            return new Position(
+                top,
+                bottom,
+                left,
+                right,
+                bbTop,
+                bbBot,
+                bbLeft,
+                bbRight,
+                pageNum
+            );
+        }
     }
 }
