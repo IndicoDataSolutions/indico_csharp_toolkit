@@ -1,7 +1,5 @@
 using Xunit;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 
 using IndicoToolkit.Association;
 using IndicoToolkit.Exception;
@@ -134,6 +132,59 @@ namespace IndicoToolkit.Tests
             Assert.Equal(positioning.getMinDistance(pos1, pos2), 0f); 
         }
 
+        [Fact]
+        public void GetMinDistance_PageDifferenceNotZero_ShouldThrowException()
+        {
+            Positioning positioning = new Positioning();
+            Position pos1 = Utils.createPosition();
+            Position pos2 = Utils.createPosition(pageNum: 2);
+            Assert.Throws<ToolkitInputException>(() => positioning.getMinDistance(pos1, pos2)); 
+        }
+
+        [Fact]
+        public void GetVerticalMinDistance_Simple_ShouldBeEqual()
+        {
+            Positioning positioning = new Positioning();
+            Position pos1 = Utils.createPosition();
+            Position pos2 = Utils.createPosition(bbTop: 11, bbBot: 20);
+            float verticalMinDistance = positioning.getVerticalMinDistance(pos1, pos2);
+            Assert.Equal(verticalMinDistance, 1f); 
+        }
+
+        [Fact]
+        public void GetVerticalMinDistance_PageDifferenceNotZero_ShouldThrowException()
+        {
+            Positioning positioning = new Positioning();
+            Position pos1 = Utils.createPosition();
+            Position pos2 = Utils.createPosition(pageNum: 2);
+            Assert.Throws<ToolkitInputException>(() => positioning.getVerticalMinDistance(pos1, pos2)); 
+        }
+
+        [Fact]
+        public void GetVerticalMinDistance_PageDifferenceNotZero_PageHeightNotNull_ShouldBeEqual()
+        {
+            Positioning positioning = new Positioning();
+            Position pos1 = Utils.createPosition();
+            Position pos2 = Utils.createPosition(pageNum: 2);
+            float verticalMinDistance = positioning.getVerticalMinDistance(pos1, pos2, pageHeight: 10);
+            Assert.Equal(verticalMinDistance, 20f); 
+        }
+
+        [Fact]
+        public void GetHorizontalMinDistnace_PageDifferenceNotZero_ShouldThrowException()
+        {
+            Positioning positioning = new Positioning();
+            Position pos1 = Utils.createPosition();
+            Position pos2 = Utils.createPosition(pageNum: 2);
+            Assert.Throws<ToolkitInputException>(() => positioning.getHorizontalMinDistance(pos1, pos2)); 
+        }
+        
+        [Fact]
+        public void GetHorizontalMinDistnace_ShouldBeEqual()
+        {
+
+        }
+        
         [Fact]
         public void DistanceBetweenPoints_ShouldBeEqual()
         {
