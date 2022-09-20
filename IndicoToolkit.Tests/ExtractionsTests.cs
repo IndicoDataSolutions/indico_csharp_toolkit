@@ -3,6 +3,8 @@ using IndicoToolkit.Types;
 using System;
 using System.Collections.Generic;
 
+using IndicoToolkit.Types;
+
 namespace IndicoToolkit.Tests
 {
     public class ExtractionFixture: IDisposable
