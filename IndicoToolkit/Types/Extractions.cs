@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using IndicoToolkit.Types;
 
-namespace IndicoToolkit
+namespace IndicoToolkit.Types
 {
     /// <summary>
     /// Class <c>Extractions</c> provides functionality for common extraction prediction use cases.
