@@ -22,6 +22,5 @@ namespace IndicoToolkit.Types
         {
             return (End != null);
         }
-
     }
 }
