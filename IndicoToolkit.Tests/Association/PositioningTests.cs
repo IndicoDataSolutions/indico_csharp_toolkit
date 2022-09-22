@@ -19,7 +19,7 @@ namespace IndicoToolkit.Tests
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
             bool isAbove = positioning.positionedAbove(abovePos, belowPos);
-            Assert.True(isAbove); 
+            Assert.True(isAbove);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace IndicoToolkit.Tests
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
             bool isAbove = positioning.positionedAbove(belowPos, abovePos);
-            Assert.False(isAbove); 
+            Assert.False(isAbove);
         }
 
         [Fact]
@@ -38,17 +38,17 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f, pageNum: 10);
-            bool isAbove = positioning.positionedAbove(abovePos, belowPos, mustBeSamePage : false);
-            Assert.True(isAbove); 
+            bool isAbove = positioning.positionedAbove(abovePos, belowPos, mustBeSamePage: false);
+            Assert.True(isAbove);
         }
 
         [Fact]
         public void PositionedAboveOverlap_IsNotSamePage_ShouldThrowException()
         {
             Positioning positioning = new Positioning();
-            Position abovePos = Utils.createPosition(pageNum : 2);
+            Position abovePos = Utils.createPosition(pageNum: 2);
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
-            Assert.Throws<ToolkitInputException>(() => positioning.positionedAboveOverlap(abovePos, belowPos)); 
+            Assert.Throws<ToolkitInputException>(() => positioning.positionedAboveOverlap(abovePos, belowPos));
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
-            Assert.False(positioning.positionedAboveOverlap(belowPos, abovePos)); 
+            Assert.False(positioning.positionedAboveOverlap(belowPos, abovePos));
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f, bbLeft: 16f, bbRight: 26f);
-            Assert.False(positioning.positionedAboveOverlap(abovePos, belowPos)); 
+            Assert.False(positioning.positionedAboveOverlap(abovePos, belowPos));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
-            Assert.True(positioning.positionedAboveOverlap(abovePos, belowPos)); 
+            Assert.True(positioning.positionedAboveOverlap(abovePos, belowPos));
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f, bbLeft: -2f, bbRight: 8f);
-            Assert.False(positioning.positionedAboveOverlap(abovePos, belowPos, minOverlapPercent : .5f)); 
+            Assert.False(positioning.positionedAboveOverlap(abovePos, belowPos, minOverlapPercent: .5f));
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
-            Assert.True(positioning.positionedAboveOverlap(abovePos, belowPos, minOverlapPercent : .5f)); 
+            Assert.True(positioning.positionedAboveOverlap(abovePos, belowPos, minOverlapPercent: .5f));
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 2);
-            Assert.False(positioning.positionedOnSameLevel(pos1, pos2)); 
+            Assert.False(positioning.positionedOnSameLevel(pos1, pos2));
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition();
-            Assert.True(positioning.positionedOnSameLevel(pos1, pos2)); 
+            Assert.True(positioning.positionedOnSameLevel(pos1, pos2));
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 10);
-            Assert.True(positioning.positionedOnSameLevel(pos1, pos2, mustBeSamePage: false)); 
+            Assert.True(positioning.positionedOnSameLevel(pos1, pos2, mustBeSamePage: false));
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition();
-            Assert.Equal(positioning.getMinDistance(pos1, pos2), 0f); 
+            Assert.Equal(positioning.getMinDistance(pos1, pos2), 0f);
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 2);
-            Assert.Throws<ToolkitInputException>(() => positioning.getMinDistance(pos1, pos2)); 
+            Assert.Throws<ToolkitInputException>(() => positioning.getMinDistance(pos1, pos2));
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace IndicoToolkit.Tests
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(bbTop: 11, bbBot: 20);
             float verticalMinDistance = positioning.getVerticalMinDistance(pos1, pos2);
-            Assert.Equal(verticalMinDistance, 1f); 
+            Assert.Equal(verticalMinDistance, 1f);
         }
 
         [Fact]
@@ -157,7 +157,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 2);
-            Assert.Throws<ToolkitInputException>(() => positioning.getVerticalMinDistance(pos1, pos2)); 
+            Assert.Throws<ToolkitInputException>(() => positioning.getVerticalMinDistance(pos1, pos2));
         }
 
         [Fact]
@@ -167,24 +167,24 @@ namespace IndicoToolkit.Tests
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 2);
             float verticalMinDistance = positioning.getVerticalMinDistance(pos1, pos2, pageHeight: 10);
-            Assert.Equal(verticalMinDistance, 20f); 
+            Assert.Equal(verticalMinDistance, 20f);
         }
 
         [Fact]
-        public void GetHorizontalMinDistnace_PageDifferenceNotZero_ShouldThrowException()
+        public void GetHorizontalMinDistance_PageDifferenceNotZero_ShouldThrowException()
         {
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 2);
-            Assert.Throws<ToolkitInputException>(() => positioning.getHorizontalMinDistance(pos1, pos2)); 
+            Assert.Throws<ToolkitInputException>(() => positioning.getHorizontalMinDistance(pos1, pos2));
         }
-        
+
         [Fact]
-        public void GetHorizontalMinDistnace_ShouldBeEqual()
+        public void GetHorizontalMinDistance_ShouldBeEqual()
         {
 
         }
-        
+
         [Fact]
         public void DistanceBetweenPoints_ShouldBeEqual()
         {
@@ -192,7 +192,7 @@ namespace IndicoToolkit.Tests
             Tuple<float, float> point1 = new Tuple<float, float>(0, 0);
             Tuple<float, float> point2 = new Tuple<float, float>(2, -2);
             float distance = positioning.distanceBetweenPoints(point1, point2);
-            Assert.Equal(distance, (float) Math.Sqrt(8f));
+            Assert.Equal(distance, (float)Math.Sqrt(8f));
         }
 
         [Fact]
@@ -222,14 +222,14 @@ namespace IndicoToolkit.Tests
             Position pos2 = Utils.createPosition();
             Assert.True(positioning.yAxisOverlap(pos1, pos2));
         }
-        
+
         [Fact]
         public void XAxisOverlap_ShouldBeFalse()
         {
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(bbLeft: 0f, bbRight: 5f);
-            Assert.False(positioning.xAxisOverlap(pos1, pos2)); 
+            Assert.False(positioning.xAxisOverlap(pos1, pos2));
         }
 
         [Fact]
@@ -238,16 +238,16 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition();
-            Assert.True(positioning.xAxisOverlap(pos1, pos2)); 
+            Assert.True(positioning.xAxisOverlap(pos1, pos2));
         }
-        
+
         [Fact]
         public void YAxisAbove_ShouldBeFalse()
         {
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition();
-            Assert.False(positioning.yAxisAbove(abovePos, belowPos)); 
+            Assert.False(positioning.yAxisAbove(abovePos, belowPos));
         }
 
         [Fact]
@@ -256,25 +256,25 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition();
             Position belowPos = Utils.createPosition(bbTop: 20f, bbBot: 30f);
-            Assert.True(positioning.yAxisAbove(abovePos, belowPos)); 
+            Assert.True(positioning.yAxisAbove(abovePos, belowPos));
         }
-        
+
         [Fact]
         public void OnSamePage_ShouldBeFalse()
         {
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition(pageNum: 10);
-            Assert.False(positioning.onSamePage(pos1, pos2)); 
+            Assert.False(positioning.onSamePage(pos1, pos2));
         }
-        
+
         [Fact]
         public void OnSamePage_ShouldBeTrue()
         {
             Positioning positioning = new Positioning();
             Position pos1 = Utils.createPosition();
             Position pos2 = Utils.createPosition();
-            Assert.True(positioning.onSamePage(pos1, pos2)); 
+            Assert.True(positioning.onSamePage(pos1, pos2));
         }
     }
 }

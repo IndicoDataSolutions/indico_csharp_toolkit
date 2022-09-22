@@ -11,8 +11,9 @@ namespace IndicoToolkit.Association
     /// Class <c>Positioning</c> helps identify relative positions in a document using bounding box data.
     /// Positions are expected to contain, at a minimum, the following top-level keys: "bbTop", "bbBot", "bbLeft", "bbRight", "page_num".
     /// </summary>
-    public class Positioning {
-        
+    public class Positioning
+    {
+
         public Positioning() { }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace IndicoToolkit.Association
         }
 
         /// <summary>
-        /// Check if the location of one box is on the same page and above another if the lower box's overlap is at least the given percentage.
+        /// Check if the location of one box is on the same page and above another and that the boxes' x-axis positions overlap by at least "minOverlapPercent".
         /// </summary>
         /// <param name="abovePos">The position excepted to be above</param>
         /// <param name="belowPos">The position excepted to be below</param>
@@ -58,9 +59,7 @@ namespace IndicoToolkit.Association
             bool isMinOverlap = true;
             if (belowPos.pageNum != abovePos.pageNum)
             {
-                throw new ToolkitInputException(
-                    "Predictions are not on the same page!"
-                );
+                return false;
             }
             if (xAxisOverlap(abovePos, belowPos) && yAxisAbove(abovePos, belowPos))
             {
@@ -126,7 +125,7 @@ namespace IndicoToolkit.Association
             };
             foreach (Tuple<string, string> p1 in corners)
             {
-                foreach (Tuple<string ,string> p2 in corners)
+                foreach (Tuple<string, string> p2 in corners)
                 {
                     float distance = distanceBetweenPoints(
                         pos1.getCorner(p1.Item1, p1.Item2),
@@ -138,7 +137,7 @@ namespace IndicoToolkit.Association
             float minDistance = distances.Min();
             if (addPageHeight)
             {
-                minDistance += (int) pageHeight * pageDifference;
+                minDistance += (int)pageHeight * pageDifference;
             }
             return minDistance;
         }
@@ -165,14 +164,14 @@ namespace IndicoToolkit.Association
                 float positionWidth = Math.Abs(pos2.bbLeft - pos2.bbRight);
                 return horizontalOverlapDistance / positionWidth;
             }
-            else 
+            else
             {
                 return 0f;
             }
         }
 
         /// <summary>
-        /// Get the amount of vertical overlap between two bounding boxes.
+        /// Get the amount of vertical overlap between two bounding boxes (i.e. percentage of y-axis overlap).
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
@@ -193,14 +192,14 @@ namespace IndicoToolkit.Association
                 float positionHeight = Math.Abs(pos2.bbTop - pos2.bbBot);
                 return verticalOverlapDistance / positionHeight;
             }
-            else 
+            else
             {
                 return 0f;
             }
         }
 
         /// <summary>
-        /// Get the vertical minimum distance between two bounding boxes.
+        /// Get the vertical minimum distance between two bounding boxes. Returns negative distance if belowPos is positioned above abovePos.
         /// </summary>
         /// <param name="abovePos">The position expected to be above</param>
         /// <param name="belowPos">The position expected to be below</param>
@@ -214,28 +213,24 @@ namespace IndicoToolkit.Association
                 if (pageHeight == null)
                 {
                     throw new ToolkitInputException(
-                        "Predictions are not on the same page! Must enter a page height." 
+                        "Predictions are not on the same page! Must enter a page height."
                     );
-                } 
-                else 
+                }
+                else
                 {
                     addPageHeight = true;
                 }
             }
             float minDistance = belowPos.bbTop - abovePos.bbBot;
-            if (minDistance < 0)
-            {
-                minDistance = 0;
-            }
             if (addPageHeight)
             {
-                minDistance += (int) pageHeight * pageDifference;
+                minDistance += (int)pageHeight * pageDifference;
             }
             return minDistance;
         }
 
         /// <summary>
-        /// Get the horizontal minimum distance between two bounding boxes.
+        /// Get the horizontal minimum distance between two bounding boxes. Returns 0 if bounding boxes are adjacent or overlap.
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
@@ -248,10 +243,13 @@ namespace IndicoToolkit.Association
                     "Predictions are not on the same page! Must enter a page height."
                 );
             }
-
+            if (xAxisOverlap(pos1, pos2))
+            {
+                return 0f;
+            }
             float minDistance1 = Math.Abs(pos1.bbLeft - pos2.bbRight);
             float minDistance2 = Math.Abs(pos1.bbRight - pos2.bbLeft);
-            return Math.Min(minDistance1, minDistance2);    
+            return Math.Min(minDistance1, minDistance2);
         }
 
         /// <summary>
@@ -261,11 +259,11 @@ namespace IndicoToolkit.Association
         /// <param name="point2">Second point</param>
         public float distanceBetweenPoints(Tuple<float, float> point1, Tuple<float, float> point2)
         {
-            float x = (float) Math.Pow(point1.Item1 - point2.Item1, 2);
-            float y = (float) Math.Pow(point1.Item2 - point2.Item2, 2);
-            return (float) Math.Sqrt(x + y);
+            float x = (float)Math.Pow(point1.Item1 - point2.Item1, 2);
+            float y = (float)Math.Pow(point1.Item2 - point2.Item2, 2);
+            return (float)Math.Sqrt(x + y);
         }
-        
+
         /// <summary>
         /// Get the manhattan distance between two points (x, y).
         /// </summary>
