@@ -8,11 +8,11 @@ using IndicoToolkit.Types;
 
 namespace IndicoToolkit.Tests
 {
-    public class Utils 
+    public class Utils
     {
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
         static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
-        static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");                
+        static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
         static public IndicoConfig config = new IndicoConfig(host: host, apiToken: api_key);
         static public IndicoClient client = new IndicoClient(config);
         public static dynamic LoadJson(string path)
@@ -49,14 +49,14 @@ namespace IndicoToolkit.Tests
             val.Add("end", end);
             val.Add("label", label);
             val.Add("text", text);
-            if (confidence == null)
+            if (confidence is null)
             {
                 JObject newConfidence = new JObject{
                     {"testLabel", .9f}
                 };
                 val.Add("confidence", newConfidence);
-            } 
-            else 
+            }
+            else
             {
                 val.Add("confidence", confidence);
             }

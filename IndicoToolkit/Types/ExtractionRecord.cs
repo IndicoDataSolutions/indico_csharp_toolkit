@@ -15,12 +15,12 @@ namespace IndicoToolkit.Types
 
         public bool ShouldSerializeStart()
         {
-            return (Start != null);
+            return (Start is not null);
         }
 
         public bool ShouldSerializeEnd()
         {
-            return (End != null);
+            return (End is not null);
         }
     }
 }
