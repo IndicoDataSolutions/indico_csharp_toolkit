@@ -22,6 +22,9 @@ namespace IndicoToolkit.Association
         /// <param name="abovePos">The position expected to be above</param>
         /// <param name="belowPos">The position expected to be below</param>
         /// <param name="mustBeSamePage">Required to be on same page. Defaults to true.</param>
+        /// <returns>
+        /// true if abovePos is above belowPos
+        /// </returns>
         public bool positionedAbove(Position abovePos, Position belowPos, bool mustBeSamePage = true)
         {
             bool isAbove = false;
@@ -53,6 +56,9 @@ namespace IndicoToolkit.Association
         /// <param name="abovePos">The position excepted to be above</param>
         /// <param name="belowPos">The position excepted to be below</param>
         /// <param name="minOverlapPercent">The minimum amount of overlap needed. Defaults to null.</param>
+        /// <returns>
+        /// true if abovePos is above belowPos and belowPos' amount of overlap is at least minOverlapPercent
+        /// </returns>
         public bool positionedAboveOverlap(Position abovePos, Position belowPos, float? minOverlapPercent = null)
         {
             bool isAbove = false;
@@ -79,6 +85,9 @@ namespace IndicoToolkit.Association
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
         /// <param name="mustBeSamePage">Required to be on same page. Defaults to true.</param>
+        /// <returns>
+        /// true if positions on same level, else false
+        /// </returns>
         public bool positionedOnSameLevel(Position pos1, Position pos2, bool mustBeSamePage = true)
         {
             bool sameLevel = false;
@@ -99,6 +108,9 @@ namespace IndicoToolkit.Association
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
         /// <param name="pageHeight">If you want to measure distance across pages, set the OCR page height otherwise locations on separate pages will raise an exception. Defaults to -1.</param>
+        /// <returns>
+        /// minimum distance
+        /// </returns>
         public float getMinDistance(Position pos1, Position pos2, int? pageHeight = null)
         {
             bool addPageHeight = false;
@@ -147,6 +159,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// percentage of pos2 that horizontally overlaps with pos1
+        /// </returns>
         public float getHorizontalOverlap(Position pos1, Position pos2)
         {
             int pageDifference = Math.Abs(pos1.pageNum - pos2.pageNum);
@@ -175,6 +190,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// percentage of pos2 that vertically overlaps with pos1
+        /// </returns>
         public float getVerticalOverlap(Position pos1, Position pos2)
         {
             int pageDifference = Math.Abs(pos1.pageNum - pos2.pageNum);
@@ -204,6 +222,9 @@ namespace IndicoToolkit.Association
         /// <param name="abovePos">The position expected to be above</param>
         /// <param name="belowPos">The position expected to be below</param>
         /// <param name="pageHeight">If you want to measure distances across pages, set the OCR page height otherwise locations on separate pages will raise an exception. Defaults to null.</param>
+        /// <returns>
+        /// minimum distance
+        /// </returns>
         public float getVerticalMinDistance(Position abovePos, Position belowPos, int? pageHeight = null)
         {
             bool addPageHeight = false;
@@ -234,6 +255,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// minimum distance
+        /// </returns>
         public float getHorizontalMinDistance(Position pos1, Position pos2)
         {
             int pageDifference = Math.Abs(pos1.pageNum - pos2.pageNum);
@@ -257,6 +281,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="point1">First point</param>
         /// <param name="point2">Second point</param>
+        /// <returns>
+        /// distance between points
+        /// </returns>
         public float distanceBetweenPoints(Tuple<float, float> point1, Tuple<float, float> point2)
         {
             float x = (float)Math.Pow(point1.Item1 - point2.Item1, 2);
@@ -269,6 +296,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="point1">First point</param>
         /// <param name="point2">Second point</param>
+        /// <returns>
+        /// manhattan distance between points
+        /// </returns>
         public float manhattanDistanceBetweenPoints(Tuple<float, float> point1, Tuple<float, float> point2)
         {
             float x = Math.Abs(point1.Item1 - point2.Item1);
@@ -281,6 +311,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// true if the two positions overlap vertically
+        /// </returns>
         public bool yAxisOverlap(Position pos1, Position pos2)
         {
             return pos2.bbBot > pos1.bbTop && pos2.bbTop < pos1.bbBot;
@@ -291,6 +324,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// true if the two positions overlap horizontally
+        /// </returns>
         public bool xAxisOverlap(Position pos1, Position pos2)
         {
             return pos1.bbLeft < pos2.bbRight && pos2.bbLeft < pos1.bbRight;
@@ -301,6 +337,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="abovePos">The position excepted to be above</param>
         /// <param name="belowPos">The position excepted to be below</param>
+        /// <returns>
+        /// true if abovePos is above belowPos
+        /// </returns>
         public bool yAxisAbove(Position abovePos, Position belowPos)
         {
             return abovePos.bbBot < belowPos.bbTop;
@@ -311,6 +350,9 @@ namespace IndicoToolkit.Association
         /// </summary>
         /// <param name="pos1">First position</param>
         /// <param name="pos2">Second position</param>
+        /// <returns>
+        /// true if the two positions are on the same page
+        /// </returns>
         public bool onSamePage(Position pos1, Position pos2)
         {
             return pos1.pageNum == pos2.pageNum;
