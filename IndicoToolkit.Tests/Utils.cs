@@ -1,8 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using Indico;
-using System.Collections.Generic;
+using IndicoV2;
 using Newtonsoft.Json.Linq;
 using IndicoToolkit.Types;
 
@@ -13,8 +12,7 @@ namespace IndicoToolkit.Tests
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
         static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
         static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
-        static public IndicoConfig config = new IndicoConfig(host: host, apiToken: api_key);
-        static public IndicoClient client = new IndicoClient(config);
+        static public IndicoClient client = new Client(host: host, apiTokenString: api_key).Create();
         public static dynamic LoadJson(string path)
         {
             string file_path = Path.Join(file_dir, path);
