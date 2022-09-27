@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Globalization;
-using Indico;
+using IndicoV2;
 using CsvHelper;
 
 using IndicoToolkit.Types;
@@ -35,19 +35,19 @@ namespace IndicoToolkit
         /// <param name="batchSize">Docs to OCR in parallel.</param>
         public async Task setDocumentText(int batchSize = 5)
         {
-            DocExtraction docex = new DocExtraction(this.client);
+            DocExtraction docex = new DocExtraction(client);
             List<List<string>> batches = this.fp.BatchFiles(batchSize).ToList();
             int totalCount = batches.Count;
             int batchCount = 1;
-            foreach(List<string> batch in batches)
+            foreach (List<string> batch in batches)
             {
                 Console.WriteLine($"Starting batch {batchCount} of {totalCount}");
                 List<OnDoc> results = await docex.RunOCR(batch);
-                foreach(OnDoc doc in results)
+                foreach (OnDoc doc in results)
                 {
                     this.fileTexts.Add(doc.GetFullText());
                 }
-                batchCount ++;
+                batchCount++;
             }
         }
 
@@ -62,17 +62,18 @@ namespace IndicoToolkit
                 csv.NextRecord();
                 for (int ind = 0; ind < this.filePaths.Count; ind++)
                 {
-                    DocRecord rec = new DocRecord{
-                            filename=Path.GetFileName(filePaths[ind]), 
-                            docClass=fileClasses[ind], 
-                            docText=fileTexts[ind]
-                        };
+                    DocRecord rec = new DocRecord
+                    {
+                        filename = Path.GetFileName(filePaths[ind]),
+                        docClass = fileClasses[ind],
+                        docText = fileTexts[ind]
+                    };
                     csv.WriteRecord(rec);
                     csv.NextRecord();
                 }
             }
         }
-        
+
         /// <summary>gathers filepaths and sets classes. Must be run prior to createClassifier</summary>
         /// <param name="acceptedTypes">Acceptable file extensions. Defaults to this.acceptedTypes</param>
         public void setFileStructure(List<string> acceptedTypes = null)

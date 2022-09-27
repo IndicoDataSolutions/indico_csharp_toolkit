@@ -1,10 +1,11 @@
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using Indico;
-using Indico.Jobs;
-using System.Threading.Tasks;
+using IndicoV2;
+using IndicoV2.Ocr.Models;
 
 using IndicoToolkit.Types;
 
@@ -12,24 +13,31 @@ using IndicoToolkit.Types;
 
 namespace IndicoToolkit
 {
-    public class DocExtraction {
+    public class DocExtraction
+    {
         public IndicoClient client;
-        public JObject ocr_config = new JObject(){{"preset_config", "ondocument"}};
-        public DocExtraction(IndicoClient _client){
+        public DocumentExtractionPreset docExtractionPreset = DocumentExtractionPreset.OnDocument;
+        public DocExtraction(IndicoClient _client)
+        {
             this.client = _client;
         }
 
-        public async Task<List<OnDoc>> RunOCR(List<string> filepaths){
+        public async Task<List<OnDoc>> RunOCR(List<string> filepaths)
+        {
             List<OnDoc> results = new List<OnDoc>();
-            var ocr = client.DocumentExtraction(this.ocr_config);
-            foreach(string path in filepaths){
-                Job job = await ocr.Exec(path);
-                var result = await job.Result();
-                string url = (string)result.GetValue("url");
-                var blob = await client.RetrieveBlob(url).Exec();
-                List<OnDocPage> pages = JsonConvert.DeserializeObject<List<OnDocPage>>(blob.AsString());
-                OnDoc ondoc = new OnDoc(pages);
-                results.Add(ondoc);
+
+            foreach (string path in filepaths)
+            {
+                string jobID = await client.Ocr().ExtractDocumentAsync(path, docExtractionPreset);
+                JObject result = await client.Jobs().GetResultAsync<JObject>(jobID);
+                Uri resultUri = new Uri((string)result["url"]);
+                var storageResult = await client.Storage().GetAsync(resultUri, default);
+                using (var reader = new JsonTextReader(new StreamReader(storageResult)))
+                {
+                    List<OnDocPage> pages = JsonSerializer.Create().Deserialize<List<OnDocPage>>(reader);
+                    OnDoc ondoc = new OnDoc(pages);
+                    results.Add(ondoc);
+                }
             }
             return results;
         }
