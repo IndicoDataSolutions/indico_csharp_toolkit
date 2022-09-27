@@ -11,7 +11,7 @@ namespace IndicoToolkit.Tests
     public class Utils
     {
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-        static public string host = "http://app.indico.io";
+        static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
         static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
         static public IndicoClient client = new Client(host: host, apiTokenString: api_key).Create();
         public static dynamic LoadJson(string path)
