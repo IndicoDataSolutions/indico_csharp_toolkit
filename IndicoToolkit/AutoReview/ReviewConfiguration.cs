@@ -11,11 +11,11 @@ namespace IndicoToolkit.AutoReview
     public class ReviewConfiguration
     {
         public List<FunctionConfig> FieldConfig { get; private set; }
-        public Dictionary<string, Callable> CustomFunctions { get; private set; }
+        public Dictionary<string, Delegate> CustomFunctions { get; private set; }
 
         public ReviewConfiguration(
                 List<FunctionConfig> fieldConfig,
-                Dictionary<string, Callable> customFunctions
+                Dictionary<string, Delegate> customFunctions
             )
         {
             CustomFunctions = customFunctions;

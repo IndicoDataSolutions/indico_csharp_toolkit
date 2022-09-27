@@ -40,11 +40,16 @@ namespace IndicoToolkit.AutoReview
         }
 
         /// <summary>
-        /// Instantiates Indico API client.
+        /// Add custom functions into reviewers
+        /// Overwrites any default reviwers if function names match
         /// </summary>
-        public IndicoClient Create()
+        public Dictionary<string, Delegate> addReviewers()
         {
+            foreach ()
+            {
 
+            }
+            return;
         }
 
     }

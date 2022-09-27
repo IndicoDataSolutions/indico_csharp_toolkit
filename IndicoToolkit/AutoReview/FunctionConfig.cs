@@ -3,14 +3,29 @@ using System.Collections.Generic;
 
 namespace IndicoToolkit.AutoReview
 {
+    public class Kwargs
+    {
+        public List<string> Labels { get; set; }
+        public float ConfThreshold { get; set; }
+
+        public Kwargs(
+            List<string> labels,
+            float confThreshold
+        )
+        {
+            Labels = labels;
+            confThreshold = ConfThreshold;
+        }
+    }
+
     public class FunctionConfig
     {
         public string Function { get; private set; }
-        public Tuple<List<string>, float> Kwargs { get; private set; }
+        public Kwargs Kwargs { get; private set; }
 
         public FunctionConfig(
             string function,
-            Tuple<List<string>, float> kwargs
+            Kwargs kwargs
         )
         {
             Function = function;
@@ -22,7 +37,7 @@ namespace IndicoToolkit.AutoReview
         /// </summary>
         public List<string> getLabels()
         {
-            return Kwargs.Item1;
+            return Kwargs.Labels;
         }
 
         /// <summary>
@@ -30,7 +45,7 @@ namespace IndicoToolkit.AutoReview
         /// </summary>
         public float getConfThreshold()
         {
-            return Kwargs.Item2;
+            return Kwargs.ConfThreshold;
         }
 
         /// <summary>
@@ -38,7 +53,7 @@ namespace IndicoToolkit.AutoReview
         /// </summary>
         public void addLabel(string label)
         {
-            Kwargs.Item1.Add(label);
+            Kwargs.Labels.Add(label);
         }
     }
 }
