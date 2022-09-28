@@ -1,4 +1,5 @@
 
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
@@ -63,8 +64,8 @@ namespace IndicoToolkit.Types
         {
             SetModelName();
             List<Prediction> predictions = new List<Prediction>();
-            JObject results = (JObject)DocumentResults.SelectToken(ModelName);
-            if (results.Properties().Select(p => p.Name).ToList().Contains("pre_review"))
+            JArray results = (JArray)DocumentResults.SelectToken($"['{ModelName}']");
+            if (results.SelectToken("pre_review") != null)
             {
                 foreach (var predictionValue in results.SelectToken("pre_review"))
                 {
@@ -74,7 +75,7 @@ namespace IndicoToolkit.Types
             }
             else
             {
-                foreach (var predictionValue in DocumentResults.SelectToken(ModelName))
+                foreach (var predictionValue in DocumentResults.SelectToken($"['{ModelName}']"))
                 {
                     Prediction prediction = new Prediction((JObject)predictionValue);
                     predictions.Add(prediction);
