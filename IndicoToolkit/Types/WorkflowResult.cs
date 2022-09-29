@@ -18,7 +18,7 @@ namespace IndicoToolkit.Types
         }
         public JObject DocumentResults
         {
-            get { return (JObject)Result.SelectToken("results.document.results"); }
+            get { return Result.SelectToken("results.document.results") as JObject; }
         }
         public List<string> AvailableModelNames
         {
@@ -29,9 +29,12 @@ namespace IndicoToolkit.Types
         {
             get { return (string)Result.SelectToken("submission_id"); }
         }
-        public string Errors
+        public List<string> Errors
         {
-            get { return (string)Result.SelectToken("errors"); }
+            get
+            {
+                return Result.SelectToken("errors").ToObject<List<string>>();
+            }
         }
         public string ReviewId
         {
@@ -49,9 +52,9 @@ namespace IndicoToolkit.Types
         {
             get { return (string)Result.SelectToken("review_rejected"); }
         }
-        public bool AdminReview
+        public string AdminReview
         {
-            get { return (bool)Result.SelectToken("admin_review"); }
+            get { return (string)Result.SelectToken("admin_review"); }
         }
 
         public WorkflowResult(JObject result, string modelName)
@@ -64,20 +67,20 @@ namespace IndicoToolkit.Types
         {
             SetModelName();
             List<Prediction> predictions = new List<Prediction>();
-            JArray results = (JArray)DocumentResults.SelectToken($"['{ModelName}']");
+            dynamic results = DocumentResults.SelectToken($"['{ModelName}']");
             if (results.SelectToken("pre_review") != null)
             {
-                foreach (var predictionValue in results.SelectToken("pre_review"))
+                foreach (dynamic predictionValue in results.SelectToken("pre_review"))
                 {
-                    Prediction prediction = new Prediction((JObject)predictionValue);
+                    Prediction prediction = new Prediction(predictionValue as JObject);
                     predictions.Add(prediction);
                 }
             }
             else
             {
-                foreach (var predictionValue in DocumentResults.SelectToken($"['{ModelName}']"))
+                foreach (dynamic predictionValue in DocumentResults.SelectToken($"['{ModelName}']"))
                 {
-                    Prediction prediction = new Prediction((JObject)predictionValue);
+                    Prediction prediction = new Prediction(predictionValue as JObject);
                     predictions.Add(prediction);
                 }
             }
@@ -89,7 +92,7 @@ namespace IndicoToolkit.Types
         /// Attempts to select the relevant model name if not already specified.
         /// Raises error if multiple models are available and ModelName specified.
         /// </summary>
-        private void SetModelName()
+        internal void SetModelName()
         {
             if (ModelName != null)
             {
@@ -110,7 +113,7 @@ namespace IndicoToolkit.Types
         /// <summary>
         /// Check if ModelName exists in AvailableModelNames
         /// </summary>
-        private void CheckIsValidModelName()
+        internal void CheckIsValidModelName()
         {
             if (!AvailableModelNames.Contains(ModelName))
             {

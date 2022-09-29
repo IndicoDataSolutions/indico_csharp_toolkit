@@ -2,6 +2,9 @@
     "file_version": 1,
     "submission_id": 45453,
     "etl_output": "indico-file:///storage/submission/782/45453/33297/etl_output.json",
+    "errors": [
+        "this is a test error"
+    ],
     "results": {
         "document": {
             "results": {
@@ -2280,5 +2283,5 @@
             "review_id": null
         }
     ],
-    "review_id": null
+    "review_id": 1
 }
