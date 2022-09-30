@@ -47,7 +47,7 @@ namespace IndicoToolkit.Tests
             val.Add("end", end);
             val.Add("label", label);
             val.Add("text", text);
-            if (confidence == null)
+            if (confidence is null)
             {
                 JObject newConfidence = new JObject{
                     {"testLabel", .9f}
