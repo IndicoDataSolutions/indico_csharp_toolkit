@@ -1,4 +1,4 @@
-using Indico;
+using IndicoV2;
 
 namespace IndicoToolkit
 {
