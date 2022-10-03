@@ -1,5 +1,3 @@
-using System;
-
 namespace IndicoToolkit.Exception
 {
     public class ToolkitInputException : System.Exception

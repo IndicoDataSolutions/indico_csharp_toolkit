@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace IndicoToolkit.AutoReview
@@ -6,15 +5,15 @@ namespace IndicoToolkit.AutoReview
     public class Kwargs
     {
         public List<string> Labels { get; set; }
-        public float ConfThreshold { get; set; }
+        public float Threshold { get; set; }
 
         public Kwargs(
             List<string> labels,
-            float confThreshold
+            float threshold
         )
         {
             Labels = labels;
-            confThreshold = ConfThreshold;
+            Threshold = threshold;
         }
     }
 
@@ -43,9 +42,9 @@ namespace IndicoToolkit.AutoReview
         /// <summary>
         /// Get confidence threshold from kwargs.
         /// </summary>
-        public float getConfThreshold()
+        public float getThreshold()
         {
-            return Kwargs.ConfThreshold;
+            return Kwargs.Threshold;
         }
 
         /// <summary>
