@@ -11,12 +11,14 @@ namespace IndicoToolkit.Tests
     {
         public ReviewConfiguration BasicReviewConfig { get; private set; }
         public ReviewConfiguration NewFunctionReviewConfig { get; private set; }
+        public ReviewConfiguration ManyFunctionsReviewConfig { get; private set; }
 
         public AutoReviewerFixture()
         {
             Dictionary<string, AutoReviewDelegate> customFunctions = new Dictionary<string, AutoReviewDelegate>();
             BasicReviewConfig = GetBasicReviewConfig();
             NewFunctionReviewConfig = GetNewFunctionReviewConfig();
+            ManyFunctionsReviewConfig = GetManyFunctionsReviewConfig();
         }
 
         public ReviewConfiguration GetBasicReviewConfig()
@@ -33,8 +35,7 @@ namespace IndicoToolkit.Tests
                     )
                 ),
             };
-            Dictionary<string, AutoReviewDelegate> customFunctions = new Dictionary<string, AutoReviewDelegate>();
-            return new ReviewConfiguration(fieldConfig, customFunctions);
+            return new ReviewConfiguration(fieldConfig);
         }
 
         public ReviewConfiguration GetNewFunctionReviewConfig()
@@ -57,6 +58,30 @@ namespace IndicoToolkit.Tests
                 { "newReviewFunction", newReviewFunction }
             };
             return new ReviewConfiguration(fieldConfig, customFunctions);
+        }
+
+        public ReviewConfiguration GetManyFunctionsReviewConfig()
+        {
+            List<FunctionConfig> fieldConfig = new List<FunctionConfig>()
+            {
+                new FunctionConfig(
+                    "rejectByConfidence",
+                    new Kwargs
+                    (
+                        labels: new List<string>() { "testLabel" },
+                        threshold: .99f
+                    )
+                ),
+                new FunctionConfig(
+                    "rejectByMaxCharacterLength",
+                    new Kwargs
+                    (
+                        labels: new List<string>() { "newLabel" },
+                        threshold: 10f
+                    )
+                )
+            };
+            return new ReviewConfiguration(fieldConfig);
         }
 
         public static List<Prediction> newReviewFunction(List<Prediction> predictions, List<string> labels, float threshold)
@@ -99,5 +124,23 @@ namespace IndicoToolkit.Tests
             autoReviewer.applyReviews();
             Assert.Equal(autoReviewer.UpdatedPredictions.Count, 0);
         }
+
+        [Fact]
+        public void AutoReviewer_ManyFunctions_ShouldRejectOne()
+        {
+            List<Prediction> predictions = new List<Prediction>()
+            {
+                Utils.CreatePrediction(),
+                Utils.CreatePrediction(label: "newLabel"),
+            };
+            ReviewConfiguration reviewConfig = Fixture.ManyFunctionsReviewConfig;
+            AutoReviewer autoReviewer = new AutoReviewer(predictions, reviewConfig);
+            autoReviewer.applyReviews();
+            bool resultOneIsRejected = autoReviewer.UpdatedPredictions[0].getValue("rejected");
+            Assert.True(resultOneIsRejected);
+            var resultTwoIsUnchanged = autoReviewer.UpdatedPredictions[1].getValue("rejected");
+            Assert.Null(resultTwoIsUnchanged);
+        }
+
     }
 }

@@ -18,10 +18,10 @@ namespace IndicoToolkit.AutoReview
 
         public ReviewConfiguration(
                 List<FunctionConfig> fieldConfig,
-                Dictionary<string, AutoReviewDelegate> customFunctions
+                Dictionary<string, AutoReviewDelegate> customFunctions = default
             )
         {
-            CustomFunctions = customFunctions;
+            CustomFunctions = customFunctions == null ? new Dictionary<string, AutoReviewDelegate>() : customFunctions;
             FieldConfig = fieldConfig;
         }
     }
