@@ -1,41 +1,25 @@
 using Xunit;
+using System.Collections.Generic;
 using IndicoToolkit.Types;
 using Newtonsoft.Json.Linq;
 
 namespace IndicoToolkit.Tests
 {
-    public class PredictionTests 
+    public class PredictionTests
     {
+        static dynamic medExtractionsJson = Utils.LoadJson("data/samples/med_extractions.json");
         [Fact]
-        public void TestGetValue()
+        public void Prediction_ImportJObject_ShouldImport()
         {
-            JObject val = JObject.Parse(@"{
-                'Key': 'Value',
-            }");
-            Prediction prediction = new Prediction(val);
-            Assert.Equal(prediction.getValue("Key"), val["Key"]);
-        }
-
-        [Fact]
-        public void TestSetValue()
-        {
-            JObject val = JObject.Parse(@"{
-                'Key': 'Value',
-            }");
-            Prediction prediction = new Prediction(val);
-            prediction.setValue("Key", (JToken) "NewValue");
-            Assert.Equal((string) prediction.getValue("Key"), "NewValue");
-        }
-
-        [Fact]
-        public void TestRemoveKey()
-        {
-            JObject val = JObject.Parse(@"{
-                'Key': 'Value',
-            }");
-            Prediction prediction = new Prediction(val);
-            prediction.removeKey("Key");
-            Assert.Equal(prediction.getValue("Key"), null);
+            List<Prediction> predictions = new List<Prediction>();
+            foreach (var medExtraction in medExtractionsJson["results"]["document"]["results"]["Medical Record Extraction"]["pre_review"])
+            {
+                JObject medExtractionAsJObject = medExtraction as JObject;
+                Prediction prediction = medExtractionAsJObject.ToObject<Prediction>();
+                predictions.Add(prediction);
+            }
+            Assert.Equal(predictions[11].Groupings[0].GroupId, "820:Linked Label Group 1");
+            Assert.Equal(predictions.Count, 44);
         }
     }
 }

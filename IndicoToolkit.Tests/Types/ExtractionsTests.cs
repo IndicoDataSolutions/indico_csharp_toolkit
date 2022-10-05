@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace IndicoToolkit.Tests
 {
-    public class ExtractionFixture: IDisposable
+    public class ExtractionFixture : IDisposable
     {
         public dynamic StaticExtractPreds { get; private set; }
         public List<Prediction> Predictions { get; private set; }
@@ -20,8 +21,11 @@ namespace IndicoToolkit.Tests
         {
             StaticExtractPreds = Utils.LoadJson("data/samples/fin_disc_result.json")["results"]["document"]["results"]["Toolkit Test Financial Model"];
             Predictions = new List<Prediction>();
-            for (int i = 0; i < StaticExtractPreds.Count; i++) {
-                Predictions.Add(new Prediction(StaticExtractPreds[i]));
+            foreach (var staticExtractPred in StaticExtractPreds)
+            {
+                JObject staticExtractPredAsJObject = staticExtractPred as JObject;
+                Prediction prediction = staticExtractPredAsJObject.ToObject<Prediction>();
+                Predictions.Add(prediction);
             }
             ExtractionsObject = new Extractions(Predictions);
         }
@@ -32,7 +36,7 @@ namespace IndicoToolkit.Tests
         }
 
     }
-    public class ExtractionsTests : IClassFixture<ExtractionFixture> 
+    public class ExtractionsTests : IClassFixture<ExtractionFixture>
     {
 
         ExtractionFixture Fixture { get; }
@@ -54,20 +58,27 @@ namespace IndicoToolkit.Tests
         public void RemoveByConfidence_StaticExtractPreds_True()
         {
             List<Prediction> predictions = new List<Prediction>();
-            for (int i = 0; i < Fixture.StaticExtractPreds.Count; i++) {
-                predictions.Add(new Prediction(Fixture.StaticExtractPreds[i]));
+            foreach (var staticExtractPred in Fixture.StaticExtractPreds)
+            {
+                JObject staticExtractPredAsJObject = staticExtractPred as JObject;
+                Prediction prediction = staticExtractPredAsJObject.ToObject<Prediction>();
+                predictions.Add(prediction);
             }
             Extractions extractionsObject = new Extractions(predictions);
-            List<string> labels = new List<string>(){"Name", "Department"};
+            List<string> labels = new List<string>() { "Name", "Department" };
             extractionsObject.removeByConfidence(0.95f, labels);
             extractionsObject.removeByConfidence(0.9f);
-            for (int i = 0; i < extractionsObject.Preds.Count; i++) {
+            for (int i = 0; i < extractionsObject.Preds.Count; i++)
+            {
                 Prediction pred = extractionsObject.Preds[i];
-                string pred_label = pred.getValue("label");
-                if (labels.Contains(pred_label)) {
-                    Assert.True(pred.getValue("confidence")[pred_label] > 0.95f);
-                } else {
-                    Assert.True(pred.getValue("confidence")[pred_label] > 0.9f);
+                string pred_label = pred.Label;
+                if (labels.Contains(pred_label))
+                {
+                    Assert.True(pred.Confidence[pred_label] > 0.95f);
+                }
+                else
+                {
+                    Assert.True(pred.Confidence[pred_label] > 0.9f);
                 }
             }
         }
@@ -76,22 +87,22 @@ namespace IndicoToolkit.Tests
         public void RemoveExceptMaxConfidence_RemovesB_KeepsA()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A", confidence: Utils.CreateNewConfidence("testLabel", .99f)));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A", confidence: Utils.CreateNewConfidence("testLabel", .99f)));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             Extractions extractionsObject = new Extractions(predictions);
-            extractionsObject.removeExceptMaxConfidence(new List<string>(){"testLabel"});
+            extractionsObject.removeExceptMaxConfidence(new List<string>() { "testLabel" });
             Assert.Equal(extractionsObject.Preds.Count, 1);
             Assert.Equal(extractionsObject.RemovedPreds.Count, 1);
-            Assert.Equal((string)extractionsObject.Preds[0].getValue("text"), "A");
-            Assert.Equal((string)extractionsObject.RemovedPreds[0].getValue("text"), "B");
+            Assert.Equal((string)extractionsObject.Preds[0].Text, "A");
+            Assert.Equal((string)extractionsObject.RemovedPreds[0].Text, "B");
         }
 
         [Fact]
         public void ExistMultipleValsForLabel_Basic_True()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             Extractions extractionsObject = new Extractions(predictions);
             Assert.True(extractionsObject.existMultipleValsForLabel("testLabel"));
         }
@@ -100,8 +111,8 @@ namespace IndicoToolkit.Tests
         public void ExistMultipleValsForLabel_DiffConfidences_True()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B", confidence: Utils.CreateNewConfidence("testLabel", .99f)));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B", confidence: Utils.CreateNewConfidence("testLabel", .99f)));
             predictions.Add(Utils.CreatePrediction(label: "otherLabel", text: "C"));
             Extractions extractionsObject = new Extractions(predictions);
             Assert.True(extractionsObject.existMultipleValsForLabel("testLabel"));
@@ -121,9 +132,9 @@ namespace IndicoToolkit.Tests
         public void GetMostCommonTextValue_ReturnA()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             Extractions extractionsObject = new Extractions(predictions);
             string mostCommonTextValue = extractionsObject.getMostCommonTextValue("testLabel");
             Assert.Equal(mostCommonTextValue, "A");
@@ -133,10 +144,10 @@ namespace IndicoToolkit.Tests
         public void GetMostCommonTextValue_Tie_ReturnNull()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             Extractions extractionsObject = new Extractions(predictions);
             string mostCommonTextValue = extractionsObject.getMostCommonTextValue("testLabel");
             Assert.Null(mostCommonTextValue);
@@ -146,8 +157,8 @@ namespace IndicoToolkit.Tests
         public void ToCSV_IncludeStartEndFalse_ThreeColumnOutput()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             string savePath = Path.Join(Utils.file_dir, "data/extractions/");
             Extractions extractionsObject = new Extractions(predictions);
             string fileName = "extractions.csv";
@@ -169,8 +180,8 @@ namespace IndicoToolkit.Tests
         public void ToCSV_IncludeStartEndTrue_FiveColumnOutput()
         {
             List<Prediction> predictions = new List<Prediction>();
-            predictions.Add(Utils.CreatePrediction(text:"A"));
-            predictions.Add(Utils.CreatePrediction(text:"B"));
+            predictions.Add(Utils.CreatePrediction(text: "A"));
+            predictions.Add(Utils.CreatePrediction(text: "B"));
             Extractions extractionsObject = new Extractions(predictions);
             string savePath = Path.Join(Utils.file_dir, "data/extractions/");
             string fileName = "extractions_include_start_end.csv";

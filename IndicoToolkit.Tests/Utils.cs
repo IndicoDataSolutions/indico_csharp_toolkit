@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using IndicoV2;
 using Newtonsoft.Json.Linq;
@@ -12,7 +13,7 @@ namespace IndicoToolkit.Tests
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
         static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
         static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
-        static public IndicoClient client = new Client(host: host, apiTokenString: api_key).Create();
+        static public IndicoClient client = new Client(host: "http://app.indico.io", apiTokenString: api_key).Create();
         public static dynamic LoadJson(string path)
         {
             string file_path = Path.Join(file_dir, path);
@@ -24,12 +25,12 @@ namespace IndicoToolkit.Tests
             }
         }
 
-        public static JObject CreateNewConfidence(
+        public static Dictionary<string, float> CreateNewConfidence(
             string label,
             float newConfidence
         )
         {
-            return new JObject {
+            return new Dictionary<string, float> {
                 { label, newConfidence}
             };
         }
@@ -37,28 +38,33 @@ namespace IndicoToolkit.Tests
         public static dynamic CreatePrediction(
             int start = 0,
             int end = 10,
+            int pageNum = 0,
             string label = "testLabel",
             string text = "text",
-            JObject confidence = null
+            Dictionary<string, float> confidence = null,
+            Grouping[] groupings = null,
+            bool rejected = false,
+            bool accepted = false
         )
         {
-            JObject val = new JObject();
-            val.Add("start", start);
-            val.Add("end", end);
-            val.Add("label", label);
-            val.Add("text", text);
-            if (confidence is null)
-            {
-                JObject newConfidence = new JObject{
-                    {"testLabel", .9f}
-                };
-                val.Add("confidence", newConfidence);
-            }
-            else
-            {
-                val.Add("confidence", confidence);
-            }
-            Prediction prediction = new Prediction(val);
+            Prediction prediction = new Prediction(
+                start,
+                end,
+                pageNum,
+                label,
+                text,
+                confidence,
+                groupings,
+                rejected,
+                accepted
+            );
+            Dictionary<string, float> defaultConfidence = new Dictionary<string, float> {
+                {"testLabel", .9f}
+            };
+            Grouping[] defaultGroupings = new Grouping[] { new Grouping("testGroupName", 0, "testGroupId") };
+
+            prediction.Confidence = confidence is null ? defaultConfidence : confidence;
+            prediction.Groupings = groupings is null ? defaultGroupings : groupings;
             return prediction;
         }
 
