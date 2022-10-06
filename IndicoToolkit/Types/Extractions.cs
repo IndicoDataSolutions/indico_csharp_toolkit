@@ -1,6 +1,7 @@
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
@@ -35,7 +36,7 @@ namespace IndicoToolkit.Types
             HashSet<string> labelSet = new HashSet<string>();
             for (int i = 0; i < predictions.Count; i++)
             {
-                labelSet.Add(predictions[i].getLabel());
+                labelSet.Add(predictions[i].Label);
             }
             return labelSet;
         }
@@ -49,7 +50,7 @@ namespace IndicoToolkit.Types
             for (int i = 0; i < Preds.Count; i++)
             {
                 Prediction pred = Preds[i];
-                string predLabel = pred.getValue("label");
+                string predLabel = pred.Label;
 
                 if (predictionLabelMap.ContainsKey(predLabel))
                 {
@@ -82,12 +83,12 @@ namespace IndicoToolkit.Types
             for (int i = 0; i < Preds.Count; i++)
             {
                 Prediction pred = Preds[i];
-                string predLabel = pred.getValue("label");
+                string predLabel = pred.Label;
                 if (labels is not null && !labels.Contains(predLabel))
                 {
                     highConfPreds.Add(pred);
                 }
-                else if (pred.getValue("confidence")[predLabel] >= confidence)
+                else if (pred.Confidence[predLabel] >= confidence)
                 {
                     highConfPreds.Add(pred);
                 }
@@ -126,8 +127,9 @@ namespace IndicoToolkit.Types
             List<Prediction> clone = new List<Prediction>();
             foreach (Prediction pred in preds)
             {
-                JObject predVal = (JObject)pred.PredictionValue.DeepClone();
-                clone.Add(new Prediction(predVal));
+                Prediction newPred = JsonConvert.DeserializeObject<Prediction>(
+                JsonConvert.SerializeObject(pred));
+                clone.Add(newPred);
             }
             return clone;
         }
@@ -153,8 +155,8 @@ namespace IndicoToolkit.Types
             for (int i = 0; i < preds.Count; i++)
             {
                 Prediction pred = preds[i];
-                float maxConfidence = pred.getValue("confidence")[pred.getLabel()];
-                pred.setValue("confidence", (JToken)maxConfidence);
+                float maxConfidence = pred.Confidence[pred.Label];
+                pred.Confidence = new Dictionary<string, float>() { { pred.Label, maxConfidence } };
             }
             return preds;
         }
@@ -174,7 +176,7 @@ namespace IndicoToolkit.Types
                 for (int j = 0; j < keysToRemove.Count; j++)
                 {
                     string key = keysToRemove[j];
-                    pred.removeKey(key);
+                    //pred.removeKey(key);
                 }
             }
         }
@@ -188,7 +190,7 @@ namespace IndicoToolkit.Types
             for (int i = 0; i < Preds.Count; i++)
             {
                 Prediction pred = Preds[i];
-                if (labels.Contains((string)pred.getValue("label")))
+                if (labels.Contains((string)pred.Label))
                 {
                     RemovedPreds.Add(pred);
                 }
@@ -222,13 +224,12 @@ namespace IndicoToolkit.Types
         /// </summary>
         public static bool isManuallyAddedPrediction(Prediction prediction)
         {
-            if (prediction.getValue("start") is int && prediction.getValue("end") is int)
+
+            if (prediction.End > prediction.Start)
             {
-                if (prediction.getValue("end") > prediction.getValue("start"))
-                {
-                    return false;
-                }
+                return false;
             }
+
             return true;
         }
 
@@ -243,8 +244,8 @@ namespace IndicoToolkit.Types
             for (int i = 0; i < preds.Count; i++)
             {
                 Prediction pred = preds[i];
-                string predLabel = pred.getLabel();
-                float predConfidence = pred.getValue($"confidence.{predLabel}");
+                string predLabel = pred.Label;
+                float predConfidence = pred.Confidence[predLabel];
                 if (predConfidence >= confidence)
                 {
                     maxPred = pred;
@@ -263,9 +264,9 @@ namespace IndicoToolkit.Types
             List<string> predictionTextValues = new List<string>();
             foreach (Prediction pred in preds)
             {
-                if (!predictionTextValues.Contains((string)pred.getValue("text")))
+                if (!predictionTextValues.Contains((string)pred.Text))
                 {
-                    predictionTextValues.Add((string)pred.getValue("text"));
+                    predictionTextValues.Add((string)pred.Text);
                 }
             }
             if (predictionTextValues.Count > 1)
@@ -284,7 +285,7 @@ namespace IndicoToolkit.Types
             Dictionary<string, int> textToCount = new Dictionary<string, int>();
             for (int i = 0; i < predictions.Count; i++)
             {
-                string text = predictions[i].getValue("text");
+                string text = predictions[i].Text;
                 if (textToCount.ContainsKey(text))
                 {
                     textToCount[text] += 1;
@@ -320,11 +321,11 @@ namespace IndicoToolkit.Types
                 Prediction pred = preds[i];
                 ExtractionRecords.Add(new ExtractionRecord
                 {
-                    Start = includeStartEnd ? pred.getValue("start") : null,
-                    End = includeStartEnd ? pred.getValue("end") : null,
-                    Label = pred.getLabel(),
-                    Text = pred.getValue("text"),
-                    Confidence = pred.getValue("confidence")
+                    Start = includeStartEnd ? pred.Start.ToString() : null,
+                    End = includeStartEnd ? pred.End.ToString() : null,
+                    Label = pred.Label,
+                    Text = pred.Text,
+                    Confidence = pred.Confidence[pred.Label].ToString()
                 });
             }
             string json = JsonConvert.SerializeObject(ExtractionRecords, Formatting.Indented);

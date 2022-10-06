@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
+using IndicoToolkit.Exception;
 using IndicoToolkit.Types;
 
 namespace IndicoToolkit.Association
@@ -31,7 +32,7 @@ namespace IndicoToolkit.Association
         /// </summary>
         public List<Prediction> sortPredictionsByStartIndex(List<Prediction> predictions)
         {
-            return predictions.OrderBy(pred => pred.getValue("start")).ToList();
+            return predictions.OrderBy(pred => pred.Start).ToList();
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace IndicoToolkit.Association
         /// </summary>
         public bool sequencesOverlap(Prediction x, Prediction y)
         {
-            return x.getValue("start") < y.getValue("end") && y.getValue("start") < x.getValue("end");
+            return x.Start < y.End && y.Start < x.End;
         }
 
         /// <summary>
@@ -65,15 +66,14 @@ namespace IndicoToolkit.Association
         /// </summary>
         public bool sequencesExact(Prediction x, Prediction y)
         {
-            return x.getValue("start") == y.getValue("start") && x.getValue("end") == y.getValue("end");
+            return x.Start == y.Start && x.End == y.End;
         }
 
         internal void checkIfTokenMatchFound(Prediction pred, bool noMatchIndicator)
         {
             if (noMatchIndicator)
             {
-                pred.setValue("error", "No matching token found for extraction");
-                throw new Exception($"Couldn't match a token to this prediction:\n{pred}");
+                throw new ToolkitInputException($"Couldn't match a token to this prediction:\n{pred}");
             }
         }
     }
