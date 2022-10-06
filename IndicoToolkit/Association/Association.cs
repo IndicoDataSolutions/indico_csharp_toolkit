@@ -1,8 +1,8 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
+using IndicoToolkit.Exception;
 using IndicoToolkit.Types;
 
 namespace IndicoToolkit.Association
@@ -73,7 +73,7 @@ namespace IndicoToolkit.Association
             if (noMatchIndicator)
             {
                 pred.setValue("error", "No matching token found for extraction");
-                throw new Exception($"Couldn't match a token to this prediction:\n{pred}");
+                throw new ToolkitInputException($"Couldn't match a token to this prediction:\n{pred}");
             }
         }
     }
