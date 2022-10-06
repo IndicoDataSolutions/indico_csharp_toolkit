@@ -11,21 +11,21 @@ namespace IndicoToolkit.Association
     /// <summary>
     /// Class <c>Association</c> is the base class for matching tokens to extraction predictions.
     /// </summary>
-    abstract class Association
+    public abstract class Association
     {
-        public List<Prediction> Predictions { get; private set; }
-        public List<Position> MappedPositions { get; private set; }
-        public List<Prediction> ManuallyAddedPreds { get; private set; }
-        public List<Prediction> ErroredPredictions { get; private set; }
+        public List<Prediction> Predictions { get; set; }
+        public List<MappedPrediction> MappedPositions { get; set; }
+        public List<Prediction> ManuallyAddedPreds { get; set; }
+        public List<Prediction> ErroredPredictions { get; set; }
         public Association(List<Prediction> predictions = null)
         {
             Predictions = (predictions == null ? new List<Prediction>() : predictions);
-            MappedPositions = new List<Position>();
+            MappedPositions = new List<MappedPrediction>();
             ManuallyAddedPreds = new List<Prediction>();
             ErroredPredictions = new List<Prediction>();
         }
 
-        public abstract void matchPredToToken();
+        public abstract int matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex);
 
         /// <summary>
         /// Sorts predictions by start index.
@@ -38,14 +38,14 @@ namespace IndicoToolkit.Association
         /// <summary>
         /// Return mapped positions by page on which they first appear
         /// </summary>
-        public Dictionary<int, List<Position>> mappedPositionsByPage()
+        public Dictionary<int, List<MappedPrediction>> mappedPositionsByPage()
         {
-            ConcurrentDictionary<int, List<Position>> pageMap = new ConcurrentDictionary<int, List<Position>>();
-            foreach (Position position in MappedPositions)
+            ConcurrentDictionary<int, List<MappedPrediction>> pageMap = new ConcurrentDictionary<int, List<MappedPrediction>>();
+            foreach (MappedPrediction position in MappedPositions)
             {
-                pageMap[position.pageNum].Add(position);
+                pageMap[position.PageNum].Add(position);
             }
-            return new Dictionary<int, List<Position>>(pageMap);
+            return new Dictionary<int, List<MappedPrediction>>(pageMap);
         }
 
         public bool isManuallyAddedPred(Prediction prediction)
@@ -56,7 +56,7 @@ namespace IndicoToolkit.Association
         /// <summary>
         /// Boolean return value indicates whether or not sequences overlap.
         /// </summary>
-        public bool sequencesOverlap(Prediction x, Prediction y)
+        public bool sequencesOverlap(DocOffset x, Prediction y)
         {
             return x.Start < y.End && y.Start < x.End;
         }

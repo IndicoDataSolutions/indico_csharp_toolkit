@@ -38,6 +38,7 @@ namespace IndicoToolkit.Types
         public Grouping[] Groupings { get; set; }
         public bool Rejected { get; set; }
         public bool Accepted { get; set; }
+        public string Error { get; set; }
         public Prediction(
             int start,
             int end,
@@ -47,7 +48,8 @@ namespace IndicoToolkit.Types
             Dictionary<string, float> confidence,
             Grouping[] groupings,
             bool rejected = false,
-            bool accepted = false
+            bool accepted = false,
+            string error = ""
         )
         {
             Start = start;
@@ -59,6 +61,7 @@ namespace IndicoToolkit.Types
             Groupings = groupings;
             Rejected = rejected;
             Accepted = accepted;
+            Error = error;
         }
     }
 

@@ -19,7 +19,32 @@ namespace IndicoToolkit.Types
         public float BbBot { get; set; }
         public float BbLeft { get; set; }
         public float BbRight { get; set; }
+        public int RowNumber { get; set; }
 
+
+        public MappedPrediction(
+            Prediction pred,
+            int top = 0,
+            int bottom = 0,
+            int left = 0,
+            int right = 0,
+            float bbTop = 0,
+            float bbBot = 0,
+            float bbLeft = 0,
+            float bbRight = 0,
+            int rowNumber = 1
+        ) : base(pred.Start, pred.End, pred.PageNum, pred.Label, pred.Text, pred.Confidence, pred.Groupings)
+        {
+            this.Top = top;
+            this.Bottom = bottom;
+            this.Left = left;
+            this.Right = right;
+            this.BbTop = bbTop;
+            this.BbBot = bbBot;
+            this.BbLeft = bbLeft;
+            this.BbRight = bbRight;
+            this.RowNumber = rowNumber;
+        }
         public MappedPrediction(
             int start,
             int end,
@@ -35,7 +60,8 @@ namespace IndicoToolkit.Types
             float bbTop,
             float bbBot,
             float bbLeft,
-            float bbRight
+            float bbRight,
+            int rowNumber
         ) : base(start, end, pageNum, label, text, confidence, groupings)
         {
             this.Top = top;
@@ -46,6 +72,7 @@ namespace IndicoToolkit.Types
             this.BbBot = bbBot;
             this.BbLeft = bbLeft;
             this.BbRight = bbRight;
+            this.RowNumber = rowNumber;
         }
 
         public Tuple<float, float> getCorner(string leftOrRight, string topOrBot)
