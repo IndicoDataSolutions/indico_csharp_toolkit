@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 
 using IndicoToolkit.Association;
-using IndicoToolkit.Exception;
 using IndicoToolkit.Types;
-using Newtonsoft.Json.Linq;
 
 namespace IndicoToolkit.Tests
 {
@@ -76,7 +74,7 @@ namespace IndicoToolkit.Tests
             List<OcrToken> updatedTokens = Utils.LoadJsonIntoObject<OcrToken>("data/line_items/three_row_invoice_tokens.json"); ;
             updatedTokens.RemoveAt(0);
             LineItems lineItems = new LineItems(Fixture.ThreeRowInvoicePreds, Fixture.LineItemFields);
-            Assert.Throws<ToolkitInputException>(() => lineItems.getBoundingBoxes(updatedTokens));
+            Assert.Throws<NullReferenceException>(() => lineItems.getBoundingBoxes(updatedTokens));
         }
 
         [Fact]

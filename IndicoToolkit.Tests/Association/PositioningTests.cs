@@ -48,7 +48,7 @@ namespace IndicoToolkit.Tests
             Positioning positioning = new Positioning();
             Position abovePos = Utils.createPosition(pageNum: 2);
             Position belowPos = Utils.createPosition(bbTop: 11f, bbBot: 20f);
-            Assert.Throws<ToolkitInputException>(() => positioning.positionedAboveOverlap(abovePos, belowPos));
+            Assert.False(positioning.positionedAboveOverlap(abovePos, belowPos));
         }
 
         [Fact]
