@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 using IndicoToolkit.Exception;
 using IndicoToolkit.Types;
@@ -14,18 +13,18 @@ namespace IndicoToolkit.Association
     public abstract class Association
     {
         public List<Prediction> Predictions { get; set; }
-        public List<MappedPrediction> MappedPositions { get; set; }
+        public List<Prediction> MappedPositions { get; set; }
         public List<Prediction> ManuallyAddedPreds { get; set; }
         public List<Prediction> ErroredPredictions { get; set; }
         public Association(List<Prediction> predictions = null)
         {
             Predictions = (predictions == null ? new List<Prediction>() : predictions);
-            MappedPositions = new List<MappedPrediction>();
+            MappedPositions = new List<Prediction>();
             ManuallyAddedPreds = new List<Prediction>();
             ErroredPredictions = new List<Prediction>();
         }
 
-        public abstract int matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex);
+        public abstract (Prediction, int) matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex);
 
         /// <summary>
         /// Sorts predictions by start index.
@@ -38,14 +37,21 @@ namespace IndicoToolkit.Association
         /// <summary>
         /// Return mapped positions by page on which they first appear
         /// </summary>
-        public Dictionary<int, List<MappedPrediction>> mappedPositionsByPage()
+        public Dictionary<int, List<Prediction>> mappedPositionsByPage()
         {
-            ConcurrentDictionary<int, List<MappedPrediction>> pageMap = new ConcurrentDictionary<int, List<MappedPrediction>>();
-            foreach (MappedPrediction position in MappedPositions)
+            Dictionary<int, List<Prediction>> pageMap = new Dictionary<int, List<Prediction>>();
+            foreach (Prediction prediction in MappedPositions)
             {
-                pageMap[position.PageNum].Add(position);
+                if (pageMap.ContainsKey(prediction.PageNum))
+                {
+                    pageMap[prediction.PageNum].Add(prediction);
+                }
+                else
+                {
+                    pageMap.Add(prediction.PageNum, new List<Prediction>() { prediction });
+                }
             }
-            return new Dictionary<int, List<MappedPrediction>>(pageMap);
+            return new Dictionary<int, List<Prediction>>(pageMap);
         }
 
         public bool isManuallyAddedPred(Prediction prediction)

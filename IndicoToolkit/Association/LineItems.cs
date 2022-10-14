@@ -37,29 +37,30 @@ namespace IndicoToolkit.Association
         /// <param name="OcrTokens">List of OCR tokens</param>
         /// <param name="predIndex">prediction index. Defaults to 0</param>
         /// <returns>Index in ocr tokens where prediction matched</returns>
-        public override int matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex = 0)
+        public override (Prediction, int) matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex = 0)
         {
             bool noMatch = true;
+            Prediction newPred = null;
             int matchTokenIndex = 0;
-            foreach (OcrToken token in OcrTokens)
+            foreach (var (index, token) in Enumerate(OcrTokens))
             {
                 if (noMatch && sequencesOverlap(token.DocOffset, pred))
                 {
-                    pred = addBoundingMetadataToPred(pred, token);
+                    newPred = addBoundingMetadataToPred(pred, token);
                     noMatch = false;
-                    matchTokenIndex = token.Index;
+                    matchTokenIndex = index;
                 }
                 else if (sequencesOverlap(token.DocOffset, pred))
                 {
-                    pred = updateBoundingMetadataForPred(new MappedPrediction(pred), token);
+                    newPred = updateBoundingMetadataForPred(pred, token);
                 }
                 else if (token.DocOffset.Start > pred.End)
                 {
                     break;
                 }
             }
-            checkIfTokenMatchFound(pred, noMatch);
-            return matchTokenIndex;
+            checkIfTokenMatchFound(newPred, noMatch);
+            return (newPred, matchTokenIndex);
         }
 
         /// <summary>
@@ -79,12 +80,12 @@ namespace IndicoToolkit.Association
             predictions = removeUnneededPredictions(predictions);
             predictions = sortPredictionsByStartIndex(predictions);
             int matchIndex = 0;
-            foreach (Prediction pred in predictions)
+            for (int i = 0; i < predictions.Count; i++)
             {
                 try
                 {
-                    matchIndex = matchPredToToken(pred, ocrTokens.GetRange(matchIndex, ocrTokens.Count - 1));
-                    MappedPositions.Add(new MappedPrediction(pred));
+                    (predictions[i], matchIndex) = matchPredToToken(predictions[i], ocrTokens.GetRange(matchIndex, ocrTokens.Count - matchIndex));
+                    MappedPositions.Add(predictions[i]);
                 }
                 catch (System.Exception e)
                 {
@@ -95,7 +96,7 @@ namespace IndicoToolkit.Association
                     else
                     {
                         Console.WriteLine($"Ignoring Error: {e}");
-                        ErroredPredictions.Add(pred);
+                        ErroredPredictions.Add(predictions[i]);
                     }
                 }
             }
@@ -107,24 +108,21 @@ namespace IndicoToolkit.Association
         public void assignRowNumber()
         {
             MappedPositions = MappedPositions.OrderBy(x => x.PageNum).ThenBy(x => x.BbTop).ThenBy(x => x.BbLeft).ToList();
-            MappedPrediction startingPred = getFirstValidLineItemPred();
-            float maxTop = startingPred.BbTop;
-            float minBot = startingPred.BbBot;
+            Prediction startingPred = getFirstValidLineItemPred();
+            float maxBot = startingPred.BbBot;
             int pageNumber = startingPred.PageNum;
             int rowNumber = 1;
-            foreach (MappedPrediction pred in MappedPositions)
+            foreach (Prediction pred in MappedPositions)
             {
-                if (pred.BbTop > minBot || pred.PageNum != pageNumber)
+                if (pred.BbTop >= maxBot || pred.PageNum != pageNumber)
                 {
                     rowNumber += 1;
                     pageNumber = pred.PageNum;
-                    maxTop = pred.BbTop;
-                    minBot = pred.BbBot;
+                    maxBot = pred.BbBot;
                 }
                 else
                 {
-                    maxTop = Math.Min(pred.BbTop, maxTop);
-                    minBot = Math.Max(pred.BbBot, minBot);
+                    maxBot = Math.Max(pred.BbBot, maxBot);
                 }
                 pred.RowNumber = rowNumber;
             }
@@ -135,12 +133,19 @@ namespace IndicoToolkit.Association
         /// After row number has been assigned to predictions, returns line item predictions
         /// as a list of lists where each list is a row.
         /// </summary>
-        public List<List<MappedPrediction>> groupedLineItems()
+        public List<List<Prediction>> groupedLineItems()
         {
-            Dictionary<int, List<MappedPrediction>> rows = new Dictionary<int, List<MappedPrediction>>();
-            foreach (MappedPrediction pred in MappedPositions)
+            Dictionary<int, List<Prediction>> rows = new Dictionary<int, List<Prediction>>();
+            foreach (Prediction pred in MappedPositions)
             {
-                rows[pred.RowNumber].Add(pred);
+                if (rows.ContainsKey(pred.RowNumber))
+                {
+                    rows[pred.RowNumber].Add(pred);
+                }
+                else
+                {
+                    rows.Add(pred.RowNumber, new List<Prediction>() { pred });
+                }
             }
             return rows.Values.ToList();
         }
@@ -176,7 +181,7 @@ namespace IndicoToolkit.Association
             return false;
         }
 
-        public MappedPrediction getFirstValidLineItemPred()
+        public Prediction getFirstValidLineItemPred()
         {
             if (MappedPositions.Count is 0)
             {
@@ -185,24 +190,35 @@ namespace IndicoToolkit.Association
             return MappedPositions[0];
         }
 
-        public MappedPrediction addBoundingMetadataToPred(Prediction pred, OcrToken token)
+        public Prediction addBoundingMetadataToPred(Prediction pred, OcrToken token)
         {
-            MappedPrediction mappedPred = new MappedPrediction(pred);
-            mappedPred.BbTop = token.Position.bbTop;
-            mappedPred.BbBot = token.Position.bbBot;
-            mappedPred.BbLeft = token.Position.bbLeft;
-            mappedPred.BbRight = token.Position.bbRight;
-            mappedPred.PageNum = token.Position.pageNum;
-            return mappedPred;
+            pred.BbTop = token.Position.bbTop;
+            pred.BbBot = token.Position.bbBot;
+            pred.BbLeft = token.Position.bbLeft;
+            pred.BbRight = token.Position.bbRight;
+            pred.PageNum = token.PageNum;
+            return pred;
         }
 
-        public MappedPrediction updateBoundingMetadataForPred(MappedPrediction pred, OcrToken token)
+        public Prediction updateBoundingMetadataForPred(Prediction pred, OcrToken token)
         {
             pred.BbTop = Math.Min(token.Position.bbTop, pred.BbTop);
             pred.BbBot = Math.Max(token.Position.bbBot, pred.BbBot);
             pred.BbLeft = Math.Min(token.Position.bbLeft, pred.BbLeft);
             pred.BbRight = Math.Max(token.Position.bbRight, pred.BbRight);
             return pred;
+        }
+
+        public static IEnumerable<(int, T)> Enumerate<T>(
+            IEnumerable<T> input,
+            int start = 0
+        )
+        {
+            int i = start;
+            foreach (var t in input)
+            {
+                yield return (i++, t);
+            }
         }
 
     }

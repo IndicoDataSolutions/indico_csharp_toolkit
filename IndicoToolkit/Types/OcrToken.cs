@@ -1,17 +1,42 @@
+using Newtonsoft.Json;
+
 namespace IndicoToolkit.Types
 {
 
     public class OcrToken
     {
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("doc_offset")]
         public DocOffset DocOffset { get; set; }
-        public int Index { get; set; }
+
+        [JsonProperty("position")]
         public Position Position { get; set; }
 
-        public OcrToken(DocOffset docOffset, int index, Position position)
+        [JsonProperty("page_num")]
+        public int PageNum { get; set; }
+
+        [JsonProperty("label")]
+        public string Label { get; set; }
+
+        [JsonProperty("prediction_index")]
+        public int PredictionIndex { get; set; }
+
+        public OcrToken(
+            string text,
+            DocOffset docOffset,
+            Position position,
+            int pageNum,
+            string label,
+            int predictionIndex)
         {
+            Text = text;
             DocOffset = docOffset;
-            Index = index;
             Position = position;
+            PageNum = pageNum;
+            Label = label;
+            PredictionIndex = predictionIndex;
         }
 
     }

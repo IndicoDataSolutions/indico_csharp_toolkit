@@ -25,6 +25,29 @@ namespace IndicoToolkit.Tests
             }
         }
 
+        public static List<T> LoadJsonIntoObject<T>(string path)
+        {
+            List<T> typeObjects = new List<T>();
+            string file_path = Path.Join(file_dir, path);
+            using (StreamReader r = new StreamReader(file_path))
+            {
+                string json = r.ReadToEnd();
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                dynamic objs = JsonConvert.DeserializeObject(json, settings);
+                foreach (var obj in objs)
+                {
+                    JObject objAsJObject = obj as JObject;
+                    T typeObject = objAsJObject.ToObject<T>();
+                    typeObjects.Add(typeObject);
+                }
+                return typeObjects;
+            }
+        }
+
         public static Dictionary<string, float> CreateNewConfidence(
             string label,
             float newConfidence

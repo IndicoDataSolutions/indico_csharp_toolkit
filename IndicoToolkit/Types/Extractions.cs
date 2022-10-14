@@ -225,7 +225,7 @@ namespace IndicoToolkit.Types
         public static bool isManuallyAddedPrediction(Prediction prediction)
         {
 
-            if (prediction.End > prediction.Start)
+            if (prediction.End == null || prediction.Start == null || prediction.End > prediction.Start)
             {
                 return false;
             }
