@@ -1,27 +1,24 @@
-using System;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using CsvHelper;
 
-using IndicoToolkit.Types;
-
-namespace IndicoToolkit
+namespace IndicoToolkit.Types
 {
     /// <summary>
     /// Class <c>Extractions</c> provides functionality for common extraction prediction use cases.
     /// </summary>
-    public class Extractions {
-        public List<Prediction> Preds { get; private set; } 
+    public class Extractions
+    {
+        public List<Prediction> Preds { get; private set; }
         public List<Prediction> RemovedPreds { get; private set; }
         public Dictionary<string, List<Prediction>> PredictionLabelMap { get; private set; }
         public HashSet<string> LabelSet { get; private set; }
-        
+
         public Extractions(List<Prediction> predictions)
         {
             Preds = predictions;
@@ -49,26 +46,29 @@ namespace IndicoToolkit
         public Dictionary<string, List<Prediction>> toDictByLabel()
         {
             Dictionary<string, List<Prediction>> predictionLabelMap = new Dictionary<string, List<Prediction>>();
-            for (int i = 0; i < Preds.Count; i++) 
+            for (int i = 0; i < Preds.Count; i++)
             {
                 Prediction pred = Preds[i];
                 string predLabel = pred.getValue("label");
 
-                if (predictionLabelMap.ContainsKey(predLabel)) {
+                if (predictionLabelMap.ContainsKey(predLabel))
+                {
                     predictionLabelMap[predLabel].Add(pred);
-                } else {
-                    predictionLabelMap.Add(predLabel, new List<Prediction>() {pred});
+                }
+                else
+                {
+                    predictionLabelMap.Add(predLabel, new List<Prediction>() { pred });
                 }
             }
             return predictionLabelMap;
         }
-        
+
         /// <summary>
         /// Method <c>numPredictions</c> returns number of predictions.
         /// </summary>
-        public int numPredictions() 
+        public int numPredictions()
         {
-            return Preds.Count; 
+            return Preds.Count;
         }
 
         /// <summary>
@@ -76,17 +76,23 @@ namespace IndicoToolkit
         /// <param name="confidence"> Confidence threshold. Defaults to 0.95f. </param>
         /// <param name="labels"> Labels where this applies. If null, applies to all. Defaults to null. </param>
         /// </summary>
-        public void removeByConfidence(float confidence = 0.95f, List<string> labels = null) 
+        public void removeByConfidence(float confidence = 0.95f, List<string> labels = null)
         {
             List<Prediction> highConfPreds = new List<Prediction>();
-            for (int i = 0; i < Preds.Count; i++) {
+            for (int i = 0; i < Preds.Count; i++)
+            {
                 Prediction pred = Preds[i];
                 string predLabel = pred.getValue("label");
-                if (labels != null && !labels.Contains(predLabel)) {
+                if (labels is not null && !labels.Contains(predLabel))
+                {
                     highConfPreds.Add(pred);
-                } else if (pred.getValue("confidence")[predLabel] >= confidence) {
+                }
+                else if (pred.getValue("confidence")[predLabel] >= confidence)
+                {
                     highConfPreds.Add(pred);
-                } else {
+                }
+                else
+                {
                     RemovedPreds.Add(pred);
                 }
             }
@@ -96,15 +102,15 @@ namespace IndicoToolkit
         /// <summary>
         /// Method <c>removeExceptMaxConfidence</c> removes all predictions except the highest confidence within each specified class.
         /// </summary>
-        public void removeExceptMaxConfidence(List<string> labels) 
+        public void removeExceptMaxConfidence(List<string> labels)
         {
             for (int i = 0; i < labels.Count; i++)
             {
                 string label = labels[i];
-                if (LabelSet.Contains(label)) 
+                if (LabelSet.Contains(label))
                 {
                     Prediction maxPred = selectMaxConfidence(label);
-                    List<string> labelList = new List<string>(){ label };
+                    List<string> labelList = new List<string>() { label };
                     removeAllByLabel(labelList);
                     RemovedPreds.Remove(maxPred);
                     Preds.Add(maxPred);
@@ -120,12 +126,12 @@ namespace IndicoToolkit
             List<Prediction> clone = new List<Prediction>();
             foreach (Prediction pred in preds)
             {
-                JObject predVal = (JObject) pred.PredictionValue.DeepClone();
+                JObject predVal = (JObject)pred.PredictionValue.DeepClone();
                 clone.Add(new Prediction(predVal));
             }
             return clone;
         }
-        
+
         /// <summary>
         /// Overwrite confidence dictionary to just max confidence float to make preds more readable.
         /// </summary>
@@ -135,8 +141,8 @@ namespace IndicoToolkit
             if (inplace)
             {
                 return SetConfidenceKeyToMaxValue(Preds);
-            } 
-            else 
+            }
+            else
             {
                 return SetConfidenceKeyToMaxValue(DeepCopyPredictions(Preds));
             }
@@ -148,22 +154,25 @@ namespace IndicoToolkit
             {
                 Prediction pred = preds[i];
                 float maxConfidence = pred.getValue("confidence")[pred.getLabel()];
-                pred.setValue("confidence", (JToken) maxConfidence);
+                pred.setValue("confidence", (JToken)maxConfidence);
             }
             return preds;
         }
-        
+
         /// <summary>
         /// Method <c>removeKeys</c> removes specified keys from prediction dictionaries.
         /// </summary>
         public void removeKeys(List<string> keysToRemove = default(List<string>))
         {
-            if (keysToRemove == null) {
-                keysToRemove = new List<string>() {"start", "end"};
+            if (keysToRemove is null)
+            {
+                keysToRemove = new List<string>() { "start", "end" };
             }
-            for (int i = 0; i < Preds.Count; i++) {
+            for (int i = 0; i < Preds.Count; i++)
+            {
                 Prediction pred = Preds[i];
-                for (int j = 0; j < keysToRemove.Count; j++) {
+                for (int j = 0; j < keysToRemove.Count; j++)
+                {
                     string key = keysToRemove[j];
                     pred.removeKey(key);
                 }
@@ -176,11 +185,15 @@ namespace IndicoToolkit
         public void removeAllByLabel(List<string> labels)
         {
             List<Prediction> newPreds = new List<Prediction>();
-            for (int i = 0; i < Preds.Count; i++) {
+            for (int i = 0; i < Preds.Count; i++)
+            {
                 Prediction pred = Preds[i];
-                if (labels.Contains((string) pred.getValue("label"))) {
+                if (labels.Contains((string)pred.getValue("label")))
+                {
                     RemovedPreds.Add(pred);
-                } else {
+                }
+                else
+                {
                     newPreds.Add(pred);
                 }
             }
@@ -193,9 +206,11 @@ namespace IndicoToolkit
         public void removeNonIndexedPredictions()
         {
             List<Prediction> newPreds = new List<Prediction>();
-            for (int i = 0; i < Preds.Count; i++) {
+            for (int i = 0; i < Preds.Count; i++)
+            {
                 Prediction pred = Preds[i];
-                if (!isManuallyAddedPrediction(pred)) {
+                if (!isManuallyAddedPrediction(pred))
+                {
                     newPreds.Add(pred);
                 }
             }
@@ -207,18 +222,21 @@ namespace IndicoToolkit
         /// </summary>
         public static bool isManuallyAddedPrediction(Prediction prediction)
         {
-            if (prediction.getValue("start") is int && prediction.getValue("end") is int) {
-                if (prediction.getValue("end") > prediction.getValue("start")) {
+            if (prediction.getValue("start") is int && prediction.getValue("end") is int)
+            {
+                if (prediction.getValue("end") > prediction.getValue("start"))
+                {
                     return false;
                 }
             }
             return true;
-        } 
+        }
 
         /// <summary>
         /// Method <c>selectMaxConfidence</c> gets the highest confidence prediction for a given field.
         /// </summary>
-        public Prediction selectMaxConfidence(string label) {
+        public Prediction selectMaxConfidence(string label)
+        {
             Prediction maxPred = null;
             float confidence = 0f;
             List<Prediction> preds = PredictionLabelMap[label];
@@ -245,12 +263,12 @@ namespace IndicoToolkit
             List<string> predictionTextValues = new List<string>();
             foreach (Prediction pred in preds)
             {
-                if (!predictionTextValues.Contains((string) pred.getValue("text")))
+                if (!predictionTextValues.Contains((string)pred.getValue("text")))
                 {
-                    predictionTextValues.Add((string) pred.getValue("text"));
+                    predictionTextValues.Add((string)pred.getValue("text"));
                 }
             }
-            if (predictionTextValues.Count > 1) 
+            if (predictionTextValues.Count > 1)
             {
                 return true;
             }
@@ -271,7 +289,7 @@ namespace IndicoToolkit
                 {
                     textToCount[text] += 1;
                 }
-                else 
+                else
                 {
                     textToCount[text] = 1;
                 }
@@ -283,7 +301,7 @@ namespace IndicoToolkit
             if (count > 1)
             {
                 return null;
-            } 
+            }
             return mostCommonText;
         }
 
@@ -293,13 +311,15 @@ namespace IndicoToolkit
         /// <param name="fileName"> The file where the preds were derived from. Defaults to "". </param>
         /// <param name="includeStartEnd"> Include columns for start/end indexes. Defaults to false. </param>
         /// </summary>
-        public void toCSV(string savePath, string fileName = "", bool includeStartEnd = false) {
-            List<Prediction> preds = setConfidenceKeyToMaxValue(inplace : false);
+        public void toCSV(string savePath, string fileName = "", bool includeStartEnd = false)
+        {
+            List<Prediction> preds = setConfidenceKeyToMaxValue(inplace: false);
             List<ExtractionRecord> ExtractionRecords = new List<ExtractionRecord>();
             for (int i = 0; i < preds.Count; i++)
             {
                 Prediction pred = preds[i];
-                ExtractionRecords.Add(new ExtractionRecord {
+                ExtractionRecords.Add(new ExtractionRecord
+                {
                     Start = includeStartEnd ? pred.getValue("start") : null,
                     End = includeStartEnd ? pred.getValue("end") : null,
                     Label = pred.getLabel(),
@@ -319,6 +339,6 @@ namespace IndicoToolkit
                 File.WriteAllText(savePath + fileName, writer.ToString());
             }
         }
-        
+
     }
 }

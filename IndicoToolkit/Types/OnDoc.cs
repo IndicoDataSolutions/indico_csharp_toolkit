@@ -76,18 +76,6 @@ namespace IndicoToolkit.Types
         public OcrStatistics ocr_statistics { get; set; }
     }
 
-    public class Position
-    {
-        public int top { get; set; }
-        public int bottom { get; set; }
-        public int left { get; set; }
-        public int right { get; set; }
-        public int bbBot { get; set; }
-        public int bbTop { get; set; }
-        public int bbLeft { get; set; }
-        public int bbRight { get; set; }
-    }
-
     public class PageOffset
     {
         public int start { get; set; }

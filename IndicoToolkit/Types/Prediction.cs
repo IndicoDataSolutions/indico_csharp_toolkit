@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace IndicoToolkit.Types
@@ -27,14 +25,15 @@ namespace IndicoToolkit.Types
 
         public string getLabel()
         {
-            return (string) predictionValue["label"];
+            return (string)predictionValue["label"];
         }
 
         public void removeKey(string key)
         {
+            /// TODO: need to account for when key doesn't exist 
             predictionValue.Remove(key);
         }
     }
 
-    
+
 }
