@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-
 namespace IndicoToolkit.Types
 {
     public class ExtractionRecord
@@ -15,12 +10,12 @@ namespace IndicoToolkit.Types
 
         public bool ShouldSerializeStart()
         {
-            return (Start != null);
+            return (Start is not null);
         }
 
         public bool ShouldSerializeEnd()
         {
-            return (End != null);
+            return (End is not null);
         }
     }
 }

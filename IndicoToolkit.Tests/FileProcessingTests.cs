@@ -31,7 +31,7 @@ namespace IndicoToolkit.Tests
             List<string> acceptedType = new List<string>() {"*.pdf","*.json"};
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir(pathToDir, acceptedType);
-            Assert.Equal(3, fptest.filePaths.Count());
+            Assert.Equal(4, fptest.filePaths.Count());
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace IndicoToolkit.Tests
             List<string> acceptedType = new List<string>() {"*.pdf","*.json"};
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir( pathToDir, acceptedType, false);
-            Assert.Equal(8, fptest.filePaths.Count());
+            Assert.Equal(9, fptest.filePaths.Count());
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace IndicoToolkit.Tests
             FileProcessing fptest = new FileProcessing();
             fptest.GetFilePathsFromDir(pathToDir, acceptedType);
             List<string> directories = fptest.GetParentDirectoriesOfFilepaths();
-            Assert.Equal(4, directories.Count());
+            Assert.Equal(5, directories.Count());
             foreach(string parent in directories){
                 Assert.Equal("samples", parent);
             }
