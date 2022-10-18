@@ -16,13 +16,10 @@ namespace IndicoToolkit.IndicoWrapper
     /// <summary>
     /// Class <c>Workflows</c> supports Workflow-related API calls
     /// </summary>
-    public class Workflows
+    public class Workflows : IndicoWrapper
     {
-        public IndicoClient client;
-        public Workflows(IndicoClient _client)
-        {
-            this.client = _client;
-        }
+        public Workflows(IndicoClient _client) : base(_client) { }
+
 
         /// <summary>
         /// Retrieves workflow with given datasetID
@@ -123,7 +120,7 @@ namespace IndicoToolkit.IndicoWrapper
             List<dynamic> results = new List<dynamic>();
             foreach (int subId in submissionIds)
             {
-                await WaitForSubmissionToProcess(subId);
+                WaitForSubmissionToProcess(subId);
                 ISubmission submission = await GetSubmissionObject(subId);
                 if (submission.Status == SubmissionStatus.FAILED)
                 {
@@ -138,25 +135,65 @@ namespace IndicoToolkit.IndicoWrapper
                         continue;
                     }
                 }
-                JObject result = CreateResult(submission);
-                result["input_file"] = submission.InputFile;
-                if (returnRawJson)
+                Stream stream = await CreateResult(submission.Id);
+                var serializer = new JsonSerializer();
+                using (var sr = new StreamReader(stream))
+                using (var jsonTextReader = new JsonTextReader(sr))
                 {
-                    results.Add(result);
-                }
-                else
-                {
-                    results.Add(new WorkflowResult(result));
+                    JObject result = serializer.Deserialize(jsonTextReader) as JObject;
+                    result["input_file"] = submission.InputFile;
+                    if (returnRawJson)
+                    {
+                        results.Add(result);
+                    }
+                    else
+                    {
+                        results.Add(new WorkflowResult(result));
+                    }
                 }
             }
             return results;
         }
 
-
-
-        public async Task<JObject> WaitForSubmissionToProcess(int submissionId)
+        public async Task<Stream> CreateResult(int submissionId)
         {
-            return await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
+            ISubmission job = await client.Submissions().GetAsync(submissionId);
+            return await GetStorageObject(job.ResultFile);
+        }
+
+        /// <summary>
+        /// Submits submission to review
+        /// </summary>
+        /// <param name="submissionId">Id of the corresponding submission</param>
+        /// <returns>JobId of submission</returns>
+        public async Task<JObject> SubmitSubmissionReview(int submissionId)
+        {
+            JObject submissionResult = await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
+            var result = submissionResult.SelectToken("results.document.results");
+            string query = @"
+                mutation SubmitReview($changes: JSONString, $rejected: Boolean, $submissionId: Int!, $forceComplete: Boolean) {
+                    submitAutoReview(changes: $changes, rejected: $rejected, submissionId: $submissionId, forceComplete: $forceComplete) {
+                        jobId
+                    }
+                }
+            ";
+
+            string operationName = "SubmitReview";
+            dynamic variables = new { changes = result?.ToString(), rejected = false, submissionId = submissionId, forceComplete = false };
+
+            return await client.GraphQLRequest().Call(query, operationName, variables);
+        }
+
+
+        /// <summary>
+        /// Wait for submissions to reach a terminal status of "COMPLETE", "PENDING_AUTO_REVIEW",
+        /// "FAILED", or "PENDING_REVIEW"
+        /// </summary>
+        /// <param name="submissionId">Id of corresponding submission</param>
+        /// <returns></returns>
+        public async void WaitForSubmissionToProcess(int submissionId)
+        {
+            await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
         }
 
     }
