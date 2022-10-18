@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using IndicoV2;
 using IndicoV2.Workflows.Models;
 using IndicoV2.Submissions.Models;
 
 using IndicoToolkit.Types;
+using IndicoToolkit.Exception;
 
-namespace IndicoToolkit
+namespace IndicoToolkit.IndicoWrapper
 {
     /// <summary>
     /// Class <c>Workflows</c> supports Workflow-related API calls
@@ -95,6 +97,66 @@ namespace IndicoToolkit
         public async Task<ISubmission> GetSubmissionObject(int submissionId)
         {
             return await client.Submissions().GetAsync(submissionId);
+        }
+
+        /// <summary>
+        /// Wait for submission to pass through workflow models and get result. If Review is enabled,
+        /// result may be retrieved prior to human review.
+        /// </summary>
+        /// <param name="submissionIds">Ids of submission predictions to retrieve</param>
+        /// <param name="timeout">seconds permitted for each submission prior to timing out</param>
+        /// <param name="returnRawJson">If true return raw json result, otherwise return WorkflowResult object</param>
+        /// <param name="throwExceptionForFailed">if true, ToolkitStatusError raised for failed submissions</param>
+        /// <param name="returnFailedResults">if true, return objects for failed submissions</param>
+        /// <param name="ignoreDeletedSubmissions">if true, ignore deleted submissions</param>
+        /// <returns>workflow result objects</returns>
+        public async Task<List<dynamic>> GetSubmissionResultsFromIds
+        (
+            List<int> submissionIds,
+            int timeout = 180,
+            bool returnRawJson = false,
+            bool throwExceptionForFailed = false,
+            bool returnFailedResults = true,
+            bool ignoreDeletedSubmissions = false
+        )
+        {
+            List<dynamic> results = new List<dynamic>();
+            foreach (int subId in submissionIds)
+            {
+                await WaitForSubmissionToProcess(subId);
+                ISubmission submission = await GetSubmissionObject(subId);
+                if (submission.Status == SubmissionStatus.FAILED)
+                {
+                    string message = $"FAILURE, Submission: {subId}. {submission.Errors}";
+                    if (throwExceptionForFailed)
+                    {
+                        throw new ToolkitStatusException(message);
+                    }
+                    else if (!returnFailedResults)
+                    {
+                        Console.WriteLine(message);
+                        continue;
+                    }
+                }
+                JObject result = CreateResult(submission);
+                result["input_file"] = submission.InputFile;
+                if (returnRawJson)
+                {
+                    results.Add(result);
+                }
+                else
+                {
+                    results.Add(new WorkflowResult(result));
+                }
+            }
+            return results;
+        }
+
+
+
+        public async Task<JObject> WaitForSubmissionToProcess(int submissionId)
+        {
+            return await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
         }
 
     }
