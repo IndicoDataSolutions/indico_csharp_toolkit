@@ -8,9 +8,10 @@ using IndicoV2;
 using CsvHelper;
 
 using IndicoToolkit.Types;
+using IndicoToolkit.IndicoWrapper;
 
 
-namespace IndicoToolkit
+namespace IndicoToolkit.AutoClass
 {
     public class AutoClassifier
     {
