@@ -46,16 +46,16 @@ namespace IndicoToolkit.IndicoWrapper
         /// </summary>
         /// <param name="etlUrl">url from "etl_output" key of workflow result json</param>
         /// <returns>'ondocument' OCR object</returns>
-        public async Task<List<OnDoc>> GetOnDocOCRFromEtlUrl(string etlUrl)
+        public async Task<OnDocOCR> GetOnDocOCRFromEtlUrl(string etlUrl)
         {
-            List<OnDoc> results = new List<OnDoc>();
+            OnDocOCR results = new OnDocOCR();
             Uri resultUri = new Uri(etlUrl);
             var storageResult = await client.Storage().GetAsync(resultUri, default);
             using (var reader = new JsonTextReader(new StreamReader(storageResult)))
             {
-                List<OnDocPage> pages = JsonSerializer.Create().Deserialize<List<OnDocPage>>(reader);
-                OnDoc ondoc = new OnDoc(pages);
-                results.Add(ondoc);
+                OnDocOCR onDocOCR = JsonSerializer.Create().Deserialize<OnDocOCR>(reader);
+                // OnDoc ondoc = new OnDoc(pages);
+                results = onDocOCR;
             }
             return results;
         }
@@ -120,7 +120,7 @@ namespace IndicoToolkit.IndicoWrapper
             List<dynamic> results = new List<dynamic>();
             foreach (int subId in submissionIds)
             {
-                WaitForSubmissionToProcess(subId);
+                await WaitForSubmissionToProcess(subId);
                 ISubmission submission = await GetSubmissionObject(subId);
                 if (submission.Status == SubmissionStatus.FAILED)
                 {
@@ -140,8 +140,8 @@ namespace IndicoToolkit.IndicoWrapper
                 using (var sr = new StreamReader(stream))
                 using (var jsonTextReader = new JsonTextReader(sr))
                 {
-                    JObject result = serializer.Deserialize(jsonTextReader) as JObject;
-                    result["input_file"] = submission.InputFile;
+                    dynamic result = serializer.Deserialize(jsonTextReader);
+                    result.input_file = submission.InputFile;
                     if (returnRawJson)
                     {
                         results.Add(result);
@@ -191,7 +191,7 @@ namespace IndicoToolkit.IndicoWrapper
         /// </summary>
         /// <param name="submissionId">Id of corresponding submission</param>
         /// <returns></returns>
-        public async void WaitForSubmissionToProcess(int submissionId)
+        public async Task WaitForSubmissionToProcess(int submissionId)
         {
             await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
         }
