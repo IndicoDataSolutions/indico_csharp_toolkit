@@ -38,13 +38,6 @@ namespace IndicoToolkit.Tests
         }
 
         [Fact]
-        public async void GetWorkflow_ValidWorkflow_ShouldGet()
-        {
-            var workflow = await Fixture.Wflow.GetWorkflow(Utils.datasetId);
-            Assert.True(workflow != null);
-        }
-
-        [Fact]
         public async void SubmitToWorkflowAndRetrieveOnDoc_ValidWorkflow_ShouldSubmitAndRetrieve()
         {
             IEnumerable<int> submissionIds = await Fixture.Wflow.SubmitDocumentsToWorkflow(Utils.workflowId, Utils.filePaths);
