@@ -13,12 +13,12 @@ using IndicoToolkit.Exception;
 namespace IndicoToolkit.IndicoWrapper
 {
     /// <summary>
-    /// Class <c>IndicoWrapper</c> supports shared API functionality
+    /// Class <c>IndicoClientWrapper</c> supports shared API functionality
     /// </summary>
-    public class IndicoWrapper
+    public class IndicoClientWrapper
     {
         public IndicoClient client;
-        public IndicoWrapper(IndicoClient _client)
+        public IndicoClientWrapper(IndicoClient _client)
         {
             this.client = _client;
         }
@@ -81,7 +81,7 @@ namespace IndicoToolkit.IndicoWrapper
         {
             List<Prediction> predictions = new List<Prediction>();
             string jobId = await client.Models().Predict(modelId, samples, default);
-            JObject jobResult = await client.Jobs().GetResultAsync<JObject>(jobId);
+            dynamic jobResults = await client.Jobs().GetResultAsync<dynamic>(jobId);
             JobStatus status = await GetJobStatus(jobId);
             if (status != JobStatus.SUCCESS)
             {
@@ -89,10 +89,16 @@ namespace IndicoToolkit.IndicoWrapper
                     $"Predictions Failed, {status}"
                 );
             }
-            foreach (JObject predictionObject in jobResult["result"])
+            foreach (var jobResult in jobResults)
             {
-                Prediction prediction = predictionObject.ToObject<Prediction>();
-                predictions.Add(prediction);
+                foreach (JArray jobObject in jobResult)
+                {
+                    foreach (var predictionObject in jobObject["result"])
+                    {
+                        Prediction prediction = predictionObject.ToObject<Prediction>();
+                        predictions.Add(prediction);
+                    }
+                }
             }
             return predictions;
         }

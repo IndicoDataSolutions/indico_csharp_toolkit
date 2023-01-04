@@ -16,7 +16,7 @@ namespace IndicoToolkit.IndicoWrapper
     /// <summary>
     /// Class <c>Workflows</c> supports Workflow-related API calls
     /// </summary>
-    public class Workflows : IndicoWrapper
+    public class Workflows : IndicoClientWrapper
     {
         public Workflows(IndicoClient _client) : base(_client) { }
 
