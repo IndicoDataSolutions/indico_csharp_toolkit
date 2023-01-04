@@ -11,12 +11,12 @@ namespace IndicoToolkit.Tests
     public class Utils
     {
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-        static public string host = "https://app.indico.io";
-        static public string api_key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTg1MTUzLCJ1c2VyX2lkIjoxNDc3OSwidXNlcl9lbWFpbCI6Im5hdGUuc2hpbUBpbmRpY28uaW8iLCJpYXQiOjE2NDk3MDQ1NDYsImF1ZCI6WyJpbmRpY286cmVmcmVzaF90b2tlbiJdfQ.XnAH_F0xcaMmSv5LwLhUTfcoqdZ1iT4ovb2daFNRqy0";
+        static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
+        static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
         static public IndicoClient client = new Client(host: host, apiTokenString: api_key).Create();
-        static public int datasetId = 11642;
-        static public int workflowId = 3965;
-        static public int modelId = 38871;
+        static public int datasetId = Environment.GetEnvironmentVariable("DATASET_ID");
+        static public int workflowId = Environment.GetEnvironmentVariable("WORKFLOW_ID");
+        static public int modelId = Environment.GetEnvironmentVariable("MODEL_ID");
         static public List<string> filePaths = new List<string>()
         {
             Path.Join(Utils.file_dir, "data/simple_doc.pdf"), 
