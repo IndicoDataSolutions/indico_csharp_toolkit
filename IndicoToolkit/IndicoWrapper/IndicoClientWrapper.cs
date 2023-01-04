@@ -81,7 +81,6 @@ namespace IndicoToolkit.IndicoWrapper
         {
             List<Prediction> predictions = new List<Prediction>();
             string jobId = await client.Models().Predict(modelId, samples, default);
-            dynamic jobResults = await client.Jobs().GetResultAsync<dynamic>(jobId);
             JobStatus status = await GetJobStatus(jobId);
             if (status != JobStatus.SUCCESS)
             {
@@ -89,6 +88,7 @@ namespace IndicoToolkit.IndicoWrapper
                     $"Predictions Failed, {status}"
                 );
             }
+            dynamic jobResults = await client.Jobs().GetResultAsync<dynamic>(jobId);
             foreach (var jobResult in jobResults)
             {
                 foreach (var predictionObject in jobResult)

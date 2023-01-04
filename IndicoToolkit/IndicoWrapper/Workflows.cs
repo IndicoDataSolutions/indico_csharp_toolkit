@@ -20,16 +20,6 @@ namespace IndicoToolkit.IndicoWrapper
     {
         public Workflows(IndicoClient _client) : base(_client) { }
 
-
-        /// <summary>
-        /// Retrieves workflow with given datasetID
-        /// </summary>
-        /// <param name="datasetId">ID of corresponding dataset</param>
-        public async Task<IEnumerable<IWorkflow>> GetWorkflow(int datasetId)
-        {
-            return await client.Workflows().ListAsync(datasetId, default);
-        }
-
         /// <summary>
         /// Submit documents to workflow
         /// </summary>
