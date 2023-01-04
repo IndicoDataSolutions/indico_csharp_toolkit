@@ -90,13 +90,31 @@ namespace IndicoToolkit.Tests
         [Fact]
         public async void GetPredictionsWithModelId_ValidModelId_ShouldGet()
         {
+            DocExtraction docExtraction = new DocExtraction(Utils.client);
+            List<OnDoc> onDocResults = await docExtraction.RunOCR(Utils.filePaths);
+            List<string> rawTexts = new List<string>();
+            foreach (OnDoc onDoc in onDocResults)
+            {
+                rawTexts.Add(onDoc.GetFullText());
+            }
+            List<Prediction> predictions = await Fixture.indicoWrapper.GetPredictionsWithModelId(Utils.modelId, rawTexts);
+            Assert.Equal(predictions.Count, 11);
+            foreach (var pred in predictions)
+            {
+                Assert.True(pred is Prediction);
+            }
+        }
+
+        [Fact]
+        public async void GetPredictionsWithModelId_ValidModelIdDummyRawText_ShouldGetNothing()
+        {
             List<string> rawTexts = new List<string>()
             {
-                "this is some raw text 12/23/22 that needs to be extracted Invoice",
+                "This is some raw text",
+                "This is some more raw text"
             };
             List<Prediction> predictions = await Fixture.indicoWrapper.GetPredictionsWithModelId(Utils.modelId, rawTexts);
             Assert.Equal(predictions.Count, 0);
         }
-
     }
 }
