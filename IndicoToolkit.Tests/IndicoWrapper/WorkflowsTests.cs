@@ -14,23 +14,12 @@ namespace IndicoToolkit.Tests
     public class WorkflowsFixture : IDisposable
     {
         public Workflows Wflow { get; private set; }
-        public List<string> FilePaths { get; private set; }
-        public int DatasetId { get; private set; }
-        public int WorkflowId { get; private set; }
-        public int SubmissionId { get; private set; }
-
+        public List<int> SubmissionIds {get; set; }
 
         public WorkflowsFixture()
         {
             Wflow = new Workflows(Utils.client);
-            FilePaths = new List<string>()
-            {
-                Path.Join(Utils.file_dir, "data/simple_doc.pdf"),
-                Path.Join(Utils.file_dir, "data/samples/fin_disc.pdf")
-            };
-            DatasetId = 10887;
-            WorkflowId = 3965;
-            SubmissionId = 153001;
+            SubmissionIds = new List<int>();
         }
 
         public void Dispose()
@@ -51,16 +40,17 @@ namespace IndicoToolkit.Tests
         [Fact]
         public async void GetWorkflow_ValidWorkflow_ShouldGet()
         {
-            var workflow = await Fixture.Wflow.GetWorkflow(Fixture.DatasetId);
+            var workflow = await Fixture.Wflow.GetWorkflow(Utils.datasetId);
             Assert.True(workflow != null);
         }
 
         [Fact]
         public async void SubmitToWorkflowAndRetrieveOnDoc_ValidWorkflow_ShouldSubmitAndRetrieve()
         {
-            IEnumerable<int> submissionIds = await Fixture.Wflow.SubmitDocumentsToWorkflow(Fixture.WorkflowId, Fixture.FilePaths);
-            await Fixture.Wflow.WaitForSubmissionToProcess(submissionIds.ElementAt<int>(0));
-            ISubmission submission = await Fixture.Wflow.GetSubmissionObject(submissionIds.ElementAt<int>(0));
+            IEnumerable<int> submissionIds = await Fixture.Wflow.SubmitDocumentsToWorkflow(Utils.workflowId, Utils.filePaths);
+            Fixture.SubmissionIds = submissionIds.ToList();
+            await Fixture.Wflow.WaitForSubmissionToProcess(Fixture.SubmissionIds[0]);
+            ISubmission submission = await Fixture.Wflow.GetSubmissionObject(Fixture.SubmissionIds[0]);
             var resultOutput = await Fixture.Wflow.GetStorageObject(submission.ResultFile);
             using (var reader = new JsonTextReader(new StreamReader(resultOutput)))
             {
@@ -75,29 +65,30 @@ namespace IndicoToolkit.Tests
         [Fact]
         public async void MarkSubmissionAsRetrieved_ShouldRetrieve()
         {
-            ISubmission sub = await Fixture.Wflow.MarkSubmissionAsRetrieved(Fixture.SubmissionId);
+            ISubmission sub = await Fixture.Wflow.MarkSubmissionAsRetrieved(Fixture.SubmissionIds[0]);
             Assert.Equal(sub.Status, SubmissionStatus.COMPLETE);
         }
 
         [Fact]
         public async void GetCompleteSubmissionObject_ShouldRetrieveMultiple()
         {
-            IEnumerable<ISubmission> submissions = await Fixture.Wflow.GetCompleteSubmissionObjects(Fixture.WorkflowId);
+            IEnumerable<ISubmission> submissions = await Fixture.Wflow.GetCompleteSubmissionObjects(Utils.workflowId);
             Assert.True(submissions.Count() > 1);
         }
 
         [Fact]
         public async void GetSubmissionObject_ShouldGet()
         {
-            ISubmission submission = await Fixture.Wflow.GetSubmissionObject(Fixture.SubmissionId);
+            var submission = await Fixture.Wflow.GetSubmissionObject(Fixture.SubmissionIds[0]);
+            Assert.True(submission != null);
+            Assert.True(submission is ISubmission);
         }
 
         [Fact]
         public async void GetSubmissionResultsFromIds_NotRawJSON_ShouldGetMultiple()
         {
-            IEnumerable<int> submissionIds = await Fixture.Wflow.SubmitDocumentsToWorkflow(Fixture.WorkflowId, Fixture.FilePaths);
-            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(submissionIds.ToList());
-            Assert.True(submissions.Count == Fixture.FilePaths.Count);
+            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(Fixture.SubmissionIds);
+            Assert.True(submissions.Count == Utils.filePaths.Count);
             foreach (var submission in submissions)
             {
                 Assert.True(submission is WorkflowResult);
@@ -107,9 +98,8 @@ namespace IndicoToolkit.Tests
         [Fact]
         public async void GetSubmissionResultsFromIds_RawJSON_ShouldGetMultiple()
         {
-            IEnumerable<int> submissionIds = await Fixture.Wflow.SubmitDocumentsToWorkflow(Fixture.WorkflowId, Fixture.FilePaths);
-            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(submissionIds.ToList(), returnRawJson: true);
-            Assert.True(submissions.Count == Fixture.FilePaths.Count);
+            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(Fixture.SubmissionIds, returnRawJson: true);
+            Assert.True(submissions.Count == Utils.filePaths.Count);
             foreach (var submission in submissions)
             {
                 Assert.False(submission is WorkflowResult);

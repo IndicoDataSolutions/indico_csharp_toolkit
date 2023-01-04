@@ -61,10 +61,12 @@ namespace IndicoToolkit.Tests
         public async void GetJobStatus_ShouldGet()
         {
             DocumentExtractionPreset docExtractionPreset = DocumentExtractionPreset.OnDocument;
-            string jobId = await Fixture.indicoWrapper.client.Ocr().ExtractDocumentAsync(Utils.filePaths[0], docExtractionPreset);;
+            string jobId = await Fixture.indicoWrapper.client.Ocr().ExtractDocumentAsync(Utils.filePaths[0], docExtractionPreset);
             JobStatus status = await Fixture.indicoWrapper.GetJobStatus(jobId);
             Assert.Equal(status, JobStatus.PENDING);
-
+            await Fixture.indicoWrapper.client.Jobs().GetResultAsync<dynamic>(jobId);
+            status = await Fixture.indicoWrapper.GetJobStatus(jobId);
+            Assert.Equal(status, JobStatus.SUCCESS);
         }
 
         [Fact]

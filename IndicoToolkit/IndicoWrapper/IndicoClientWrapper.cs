@@ -91,13 +91,10 @@ namespace IndicoToolkit.IndicoWrapper
             }
             foreach (var jobResult in jobResults)
             {
-                foreach (JArray jobObject in jobResult)
+                foreach (var predictionObject in jobResult)
                 {
-                    foreach (var predictionObject in jobObject["result"])
-                    {
-                        Prediction prediction = predictionObject.ToObject<Prediction>();
-                        predictions.Add(prediction);
-                    }
+                    Prediction prediction = predictionObject.ToObject<Prediction>();
+                    predictions.Add(prediction);
                 }
             }
             return predictions;
