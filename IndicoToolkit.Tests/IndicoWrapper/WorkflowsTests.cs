@@ -80,22 +80,11 @@ namespace IndicoToolkit.Tests
         [Fact]
         public async void GetSubmissionResultsFromIds_NotRawJSON_ShouldGetMultiple()
         {
-            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(Fixture.SubmissionIds);
+            List<WorkflowResult> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(Fixture.SubmissionIds);
             Assert.True(submissions.Count == Utils.filePaths.Count);
             foreach (var submission in submissions)
             {
                 Assert.True(submission is WorkflowResult);
-            }
-        }
-
-        [Fact]
-        public async void GetSubmissionResultsFromIds_RawJSON_ShouldGetMultiple()
-        {
-            List<dynamic> submissions = await Fixture.Wflow.GetSubmissionResultsFromIds(Fixture.SubmissionIds, returnRawJson: true);
-            Assert.True(submissions.Count == Utils.filePaths.Count);
-            foreach (var submission in submissions)
-            {
-                Assert.False(submission is WorkflowResult);
             }
         }
     }

@@ -97,17 +97,15 @@ namespace IndicoToolkit.IndicoWrapper
         /// <param name="returnFailedResults">if true, return objects for failed submissions</param>
         /// <param name="ignoreDeletedSubmissions">if true, ignore deleted submissions</param>
         /// <returns>workflow result objects</returns>
-        public async Task<List<dynamic>> GetSubmissionResultsFromIds
-        (
+        public async Task<List<WorkflowResult>> GetSubmissionResultsFromIds(
             List<int> submissionIds,
             int timeout = 180,
-            bool returnRawJson = false,
             bool throwExceptionForFailed = false,
             bool returnFailedResults = true,
             bool ignoreDeletedSubmissions = false
         )
         {
-            List<dynamic> results = new List<dynamic>();
+            List<WorkflowResult> results = new List<WorkflowResult>();
             foreach (int subId in submissionIds)
             {
                 await WaitForSubmissionToProcess(subId);
@@ -132,11 +130,6 @@ namespace IndicoToolkit.IndicoWrapper
                 {
                     dynamic result = serializer.Deserialize(jsonTextReader);
                     result.input_file = submission.InputFile;
-                    if (returnRawJson)
-                    {
-                        results.Add(result);
-                    }
-                    else
                     {
                         results.Add(new WorkflowResult(result));
                     }
@@ -145,35 +138,16 @@ namespace IndicoToolkit.IndicoWrapper
             return results;
         }
 
+        /// <summary>
+        ///  Returns result storage object from submissionId. 
+        /// </summary>
+        /// <param name="submissionId">Submission Id to get result from</param>
+        /// <returns>Storage object as stream</returns>
         public async Task<Stream> CreateResult(int submissionId)
         {
             ISubmission job = await client.Submissions().GetAsync(submissionId);
             return await GetStorageObject(job.ResultFile);
         }
-
-        /// <summary>
-        /// Submits submission to review
-        /// </summary>
-        /// <param name="submissionId">Id of the corresponding submission</param>
-        /// <returns>JobId of submission</returns>
-        public async Task<JObject> SubmitSubmissionReview(int submissionId)
-        {
-            JObject submissionResult = await client.GetSubmissionResultAwaiter().WaitReady(submissionId);
-            var result = submissionResult.SelectToken("results.document.results");
-            string query = @"
-                mutation SubmitReview($changes: JSONString, $rejected: Boolean, $submissionId: Int!, $forceComplete: Boolean) {
-                    submitAutoReview(changes: $changes, rejected: $rejected, submissionId: $submissionId, forceComplete: $forceComplete) {
-                        jobId
-                    }
-                }
-            ";
-
-            string operationName = "SubmitReview";
-            dynamic variables = new { changes = result?.ToString(), rejected = false, submissionId = submissionId, forceComplete = false };
-
-            return await client.GraphQLRequest().Call(query, operationName, variables);
-        }
-
 
         /// <summary>
         /// Wait for submissions to reach a terminal status of "COMPLETE", "PENDING_AUTO_REVIEW",
