@@ -11,7 +11,7 @@ using IndicoToolkit.Types;
 
 // TODO: Add exception handling, Add standard preset_config object
 
-namespace IndicoToolkit
+namespace IndicoToolkit.IndicoWrapper
 {
     public class DocExtraction
     {

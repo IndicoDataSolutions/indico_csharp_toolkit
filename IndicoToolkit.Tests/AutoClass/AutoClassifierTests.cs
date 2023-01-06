@@ -8,25 +8,27 @@ using System.Threading.Tasks;
 using System.Globalization;
 using CsvHelper;
 
+using IndicoToolkit.AutoClass;
+
 
 namespace IndicoToolkit.Tests
 {
-    public class AutoClassifierTests 
+    public class AutoClassifierTests
     {
         static string targetPath = Path.Join(Utils.file_dir, "data/auto_class/");
         static string badFilesPath = Path.Join(Utils.file_dir, "data/auto_class/empty/");
         static string badClassPath = Path.Join(Utils.file_dir, "data/auto_class/a/");
-        
+
         [Fact]
         public void TestSetFileStructure()
         {
             AutoClassifier auto = new AutoClassifier(Utils.client, targetPath);
             auto.setFileStructure();
-            Assert.Equal(1, auto.fileClasses.Where(s=> s == "b").Count());
-            Assert.Equal(2, auto.fileClasses.Where(s=> s == "a").Count());
+            Assert.Equal(1, auto.fileClasses.Where(s => s == "b").Count());
+            Assert.Equal(2, auto.fileClasses.Where(s => s == "a").Count());
             Assert.Equal(3, auto.filePaths.Count());
         }
-        
+
         [Fact]
         public void TestSetFileStructureNoFiles()
         {
@@ -47,10 +49,10 @@ namespace IndicoToolkit.Tests
             AutoClassifier auto = new AutoClassifier(Utils.client, targetPath);
             auto.setFileStructure();
             await auto.setDocumentText(2);
-            Assert.Equal(1, auto.fileClasses.Where(s=> s == "b").Count());
-            Assert.Equal(2, auto.fileClasses.Where(s=> s == "a").Count());
+            Assert.Equal(1, auto.fileClasses.Where(s => s == "b").Count());
+            Assert.Equal(2, auto.fileClasses.Where(s => s == "a").Count());
             Assert.Equal(3, auto.fileTexts.Count());
-            Assert.Equal(2, auto.fileTexts.Where(s=> s.Contains("YY")).Count());
+            Assert.Equal(2, auto.fileTexts.Where(s => s.Contains("YY")).Count());
         }
 
         [Fact]
@@ -68,7 +70,7 @@ namespace IndicoToolkit.Tests
             {
                 List<DocRecord> records = csv.GetRecords<DocRecord>().ToList();
                 Assert.Equal(3, records.Count());
-                foreach(DocRecord rec in records)
+                foreach (DocRecord rec in records)
                 {
                     Assert.Contains(".pdf", rec.filename);
                     if (rec.filename.Contains("yy"))
@@ -76,12 +78,14 @@ namespace IndicoToolkit.Tests
                         Assert.Equal("a", rec.docClass);
                         Assert.Contains("YY", rec.docText);
                         Assert.Contains("ZZ", rec.docText);
-                        shouldBeTwoAclass ++;
-                    } else {
+                        shouldBeTwoAclass++;
+                    }
+                    else
+                    {
                         Assert.Equal("b", rec.docClass);
                         Assert.DoesNotContain("YY", rec.docText);
                         Assert.DoesNotContain("ZZ", rec.docText);
-                        shouldBeOneBclass ++;
+                        shouldBeOneBclass++;
                     }
                 }
             }

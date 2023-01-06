@@ -3,7 +3,12 @@ A C# class library to assist Indico IPA development
 
 ### Available Functionality
 The indico toolkit provides classes and functions to help achieve the following:
-* <TODO>
+* Easy batch workflow submission and retrieval.
+* Classes that simplify dataset/doc-extraction functionality.
+* Tools to assist with positioning, e.g. row association, distance between preds, relative position validation.
+* Common manipulation of prediction/workflow results.
+* Objects to simplify parsing OCR responses.
+* Class to spoof a human reviewer.
 
 ### Installation
 ```
@@ -14,7 +19,14 @@ The indico toolkit provides classes and functions to help achieve the following:
 <TODO>
 
 ### Tests
-<TODO>
+To run the test suite, run `dotnet test` within the `IndicoToolkit.Tests` folder.
+
+You will need the following environment variables to run the entire test suite:
+- `INDICO_HOST`: Indico host URL
+- `INDICO_KEY`: Corresponding API key value to the host.
+- `DATASET_ID`: Dataset Id linked to workflow with fully trained model
+- `WORKFLOW_ID`: Corresponding workflow Id to the dataset
+- `MODEL_ID`: Corresponding model Id to the dataset
 
 ### Example 
 <TODO>
