@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndicoToolkit", "IndicoToolkit\IndicoToolkit.csproj", "{CF3F1D20-B4ED-4409-B0E7-6AC56B5A78F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndicoToolkit.Tests", "IndicoToolkit.Tests\IndicoToolkit.Tests.csproj", "{C297A122-A66C-49B2-B316-5F5139C95059}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF3F1D20-B4ED-4409-B0E7-6AC56B5A78F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF3F1D20-B4ED-4409-B0E7-6AC56B5A78F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF3F1D20-B4ED-4409-B0E7-6AC56B5A78F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF3F1D20-B4ED-4409-B0E7-6AC56B5A78F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C297A122-A66C-49B2-B316-5F5139C95059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C297A122-A66C-49B2-B316-5F5139C95059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C297A122-A66C-49B2-B316-5F5139C95059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C297A122-A66C-49B2-B316-5F5139C95059}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
