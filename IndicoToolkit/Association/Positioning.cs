@@ -243,6 +243,7 @@ namespace IndicoToolkit.Association
                 }
             }
             float minDistance = belowPos.bbTop - abovePos.bbBot;
+
             if (addPageHeight)
             {
                 minDistance += (int)pageHeight * pageDifference;

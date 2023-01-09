@@ -111,7 +111,7 @@ namespace IndicoToolkit.Tests
             ReviewConfiguration reviewConfig = Fixture.BasicReviewConfig;
             AutoReviewer autoReviewer = new AutoReviewer(predictions, reviewConfig);
             autoReviewer.applyReviews();
-            bool resultIsRejected = autoReviewer.UpdatedPredictions[0].getValue("rejected");
+            bool resultIsRejected = autoReviewer.UpdatedPredictions[0].Rejected;
             Assert.True(resultIsRejected);
         }
 
@@ -136,10 +136,10 @@ namespace IndicoToolkit.Tests
             ReviewConfiguration reviewConfig = Fixture.ManyFunctionsReviewConfig;
             AutoReviewer autoReviewer = new AutoReviewer(predictions, reviewConfig);
             autoReviewer.applyReviews();
-            bool resultOneIsRejected = autoReviewer.UpdatedPredictions[0].getValue("rejected");
+            bool resultOneIsRejected = autoReviewer.UpdatedPredictions[0].Rejected;
             Assert.True(resultOneIsRejected);
-            var resultTwoIsUnchanged = autoReviewer.UpdatedPredictions[1].getValue("rejected");
-            Assert.Null(resultTwoIsUnchanged);
+            bool resultTwoIsUnchanged = autoReviewer.UpdatedPredictions[1].Rejected;
+            Assert.False(resultTwoIsUnchanged);
         }
 
     }

@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 using IndicoToolkit.Exception;
 using IndicoToolkit.Types;
@@ -10,41 +9,48 @@ namespace IndicoToolkit.Association
     /// <summary>
     /// Class <c>Association</c> is the base class for matching tokens to extraction predictions.
     /// </summary>
-    abstract class Association
+    public abstract class Association
     {
-        public List<Prediction> Predictions { get; private set; }
-        public List<Position> MappedPositions { get; private set; }
-        public List<Prediction> ManuallyAddedPreds { get; private set; }
-        public List<Prediction> ErroredPredictions { get; private set; }
+        public List<Prediction> Predictions { get; set; }
+        public List<Prediction> MappedPositions { get; set; }
+        public List<Prediction> ManuallyAddedPreds { get; set; }
+        public List<Prediction> ErroredPredictions { get; set; }
         public Association(List<Prediction> predictions = null)
         {
             Predictions = (predictions == null ? new List<Prediction>() : predictions);
-            MappedPositions = new List<Position>();
+            MappedPositions = new List<Prediction>();
             ManuallyAddedPreds = new List<Prediction>();
             ErroredPredictions = new List<Prediction>();
         }
 
-        public abstract void matchPredToToken();
+        public abstract (Prediction, int) matchPredToToken(Prediction pred, List<OcrToken> OcrTokens, int predIndex);
 
         /// <summary>
         /// Sorts predictions by start index.
         /// </summary>
         public List<Prediction> sortPredictionsByStartIndex(List<Prediction> predictions)
         {
-            return predictions.OrderBy(pred => pred.getValue("start")).ToList();
+            return predictions.OrderBy(pred => pred.Start).ToList();
         }
 
         /// <summary>
         /// Return mapped positions by page on which they first appear
         /// </summary>
-        public Dictionary<int, List<Position>> mappedPositionsByPage()
+        public Dictionary<int, List<Prediction>> mappedPositionsByPage()
         {
-            ConcurrentDictionary<int, List<Position>> pageMap = new ConcurrentDictionary<int, List<Position>>();
-            foreach (Position position in MappedPositions)
+            Dictionary<int, List<Prediction>> pageMap = new Dictionary<int, List<Prediction>>();
+            foreach (Prediction prediction in MappedPositions)
             {
-                pageMap[position.pageNum].Add(position);
+                if (pageMap.ContainsKey(prediction.PageNum))
+                {
+                    pageMap[prediction.PageNum].Add(prediction);
+                }
+                else
+                {
+                    pageMap.Add(prediction.PageNum, new List<Prediction>() { prediction });
+                }
             }
-            return new Dictionary<int, List<Position>>(pageMap);
+            return new Dictionary<int, List<Prediction>>(pageMap);
         }
 
         public bool isManuallyAddedPred(Prediction prediction)
@@ -55,9 +61,9 @@ namespace IndicoToolkit.Association
         /// <summary>
         /// Boolean return value indicates whether or not sequences overlap.
         /// </summary>
-        public bool sequencesOverlap(Prediction x, Prediction y)
+        public bool sequencesOverlap(DocOffset x, Prediction y)
         {
-            return x.getValue("start") < y.getValue("end") && y.getValue("start") < x.getValue("end");
+            return x.Start < y.End && y.Start < x.End;
         }
 
         /// <summary>
@@ -65,14 +71,14 @@ namespace IndicoToolkit.Association
         /// </summary>
         public bool sequencesExact(Prediction x, Prediction y)
         {
-            return x.getValue("start") == y.getValue("start") && x.getValue("end") == y.getValue("end");
+            return x.Start == y.Start && x.End == y.End;
         }
 
         internal void checkIfTokenMatchFound(Prediction pred, bool noMatchIndicator)
         {
             if (noMatchIndicator)
             {
-                pred.setValue("error", "No matching token found for extraction");
+                pred.Error = "No matching token found for extraction";
                 throw new ToolkitInputException($"Couldn't match a token to this prediction:\n{pred}");
             }
         }
