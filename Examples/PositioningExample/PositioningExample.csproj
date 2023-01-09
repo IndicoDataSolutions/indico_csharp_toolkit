@@ -5,12 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\SubmittingToWorkflowExample\workflow-sample.pdf" Link="workflow-sample.pdf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\IndicoToolkit\IndicoToolkit.csproj" />
   </ItemGroup>
 

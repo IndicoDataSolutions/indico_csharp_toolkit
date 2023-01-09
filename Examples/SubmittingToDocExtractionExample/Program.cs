@@ -15,18 +15,19 @@ namespace Examples
     /// </summary>
     public class SubmittingToDocExtractionExample
     {
+        private static string GetHost() => Environment.GetEnvironmentVariable("INDICO_HOST");
         private static string GetToken() => Environment.GetEnvironmentVariable("INDICO_KEY");
-        private static string GetDirectory() => Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "datasets");
+        private static string GetDirectory() => Environment.GetEnvironmentVariable("DIRECTORY_NAME");
 
         public static async Task Main()
         {
             /// Instantiate the DocExtraction class
-            IndicoClient client = new Client(host: "http://app.indico.io", apiTokenString: GetToken()).Create();
+            IndicoClient client = new Client(host: GetHost(), apiTokenString: GetToken()).Create();
             DocExtraction docExtraction = new DocExtraction(client, docExtractionPreset: DocumentExtractionPreset.OnDocument);
 
             /// Collect files to submit
             FileProcessing Fp = FileProcessing(); 
-            Fp.GetFilePathsFromDir(GetDirectory()); 
+            Fp.GetFilePathsFromDir(Path.Join(Directory.GetCurrentDirectory(), GetDirectory()); 
 
             /// Submit documents with optional text setting and save results to variable
             List<OnDoc> docTexts = new List<OnDoc>();

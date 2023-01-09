@@ -19,13 +19,14 @@ namespace Examples
     /// </summary>
     public class AutoClassifierExample
     {
+        private static string GetHost() => Environment.GetEnvironmentVariable("INDICO_HOST");
         private static string GetToken() => Environment.GetEnvironmentVariable("INDICO_KEY");
         private static string GetBaseDirectory() => Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "base_directory");
         private static string GetFilePath() => Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "auto_classifier.csv");
 
         public static async Task Main()
         {
-            IndicoClient client = new Client(host: "http://app.indico.io", apiTokenString: GetToken()).Create();
+            IndicoClient client = new Client(host: GetHost(), apiTokenString: GetToken()).Create();
             
             AutoClassifier autoClassifier = new AutoClassifier(client, GetBaseDirectory());
             autoClassifier.setFileStructure(new List<string>(){"pdf", "tiff"});
