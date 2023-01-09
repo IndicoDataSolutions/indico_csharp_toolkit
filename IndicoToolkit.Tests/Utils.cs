@@ -13,7 +13,15 @@ namespace IndicoToolkit.Tests
         static public string file_dir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
         static public string host = Environment.GetEnvironmentVariable("INDICO_HOST");
         static public string api_key = Environment.GetEnvironmentVariable("INDICO_KEY");
-        static public IndicoClient client = new Client(host: "http://app.indico.io", apiTokenString: api_key).Create();
+        static public IndicoClient client = new Client(host: host, apiTokenString: api_key).Create();
+        static public int datasetId = Environment.GetEnvironmentVariable("DATASET_ID");
+        static public int workflowId = Environment.GetEnvironmentVariable("WORKFLOW_ID");
+        static public int modelId = Environment.GetEnvironmentVariable("MODEL_ID");
+        static public List<string> filePaths = new List<string>()
+        {
+            Path.Join(Utils.file_dir, "data/simple_doc.pdf"), 
+            Path.Join(Utils.file_dir, "data/samples/fin_disc.pdf")
+        };
         public static dynamic LoadJson(string path)
         {
             string file_path = Path.Join(file_dir, path);

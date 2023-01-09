@@ -3,16 +3,19 @@ using IndicoToolkit.Types;
 using System.Collections.Generic;
 using System.IO;
 
+using IndicoToolkit.IndicoWrapper;
+
 namespace IndicoToolkit.Tests
 {
-    public class DocExtractionTests 
+    public class DocExtractionTests
     {
         static string pdfPath = Path.Join(Utils.file_dir, "data/simple_doc.pdf");
-        
+
         [Fact]
-        public async void TestRunOCR(){
+        public async void TestRunOCR()
+        {
             DocExtraction docx = new DocExtraction(Utils.client);
-            List<string> fpaths = new List<string>{pdfPath};
+            List<string> fpaths = new List<string> { pdfPath };
             List<OnDoc> results = await docx.RunOCR(fpaths);
             Assert.Equal(1, results.Count);
             Assert.Equal(2, results[0].GetPageTexts().Count);

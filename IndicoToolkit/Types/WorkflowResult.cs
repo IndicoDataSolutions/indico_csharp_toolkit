@@ -57,7 +57,7 @@ namespace IndicoToolkit.Types
             get { return (string)Result.SelectToken("admin_review"); }
         }
 
-        public WorkflowResult(JObject result, string modelName)
+        public WorkflowResult(JObject result, string modelName = "")
         {
             Result = result;
             ModelName = modelName;
