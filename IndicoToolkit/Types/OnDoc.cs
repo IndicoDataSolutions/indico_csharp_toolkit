@@ -3,18 +3,22 @@ using System.Collections.Generic;
 
 namespace IndicoToolkit.Types
 {
-    public class OnDoc {
+    public class OnDoc
+    {
 
-        public List<OnDocPage> ondoc {get; set;}
+        public List<OnDocPage> ondoc { get; set; }
 
-        public OnDoc(List<OnDocPage> ondocResult){
+        public OnDoc(List<OnDocPage> ondocResult)
+        {
             ondoc = ondocResult;
         }
-        public List<string> GetPageTexts(){
+        public List<string> GetPageTexts()
+        {
             return ondoc.Select(s => s.pages.First().text).ToList();
         }
 
-        public string GetFullText(){
+        public string GetFullText()
+        {
             List<string> page_texts = GetPageTexts();
             return string.Join("\n", page_texts.ToArray());
         }
@@ -49,12 +53,6 @@ namespace IndicoToolkit.Types
     {
         public int height { get; set; }
         public int width { get; set; }
-    }
-
-    public class DocOffset
-    {
-        public int start { get; set; }
-        public int end { get; set; }
     }
 
     public class OcrStatistics

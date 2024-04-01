@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace IndicoToolkit.Types
 {
     public class ExtractionRecord

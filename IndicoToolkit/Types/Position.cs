@@ -10,11 +10,11 @@ namespace IndicoToolkit.Types
         public int bottom { get; set; }
         public int left { get; set; }
         public int right { get; set; }
-        public float bbTop {get; set;}
-        public float bbBot {get; set;}
-        public float bbLeft {get; set;}
-        public float bbRight {get; set;}
-        public int pageNum {get; set;}
+        public float bbTop { get; set; }
+        public float bbBot { get; set; }
+        public float bbLeft { get; set; }
+        public float bbRight { get; set; }
+        public int pageNum { get; set; }
 
         public Position(
             int top,
@@ -47,11 +47,12 @@ namespace IndicoToolkit.Types
                     "Invalid input. Ensure the first arg is 'bbRight' or 'bbLeft' and the second arg is 'bbTop' or 'bbBot'"
                 );
             }
-            float leftOrRightVal = leftOrRight == "bbRight" ? bbRight : bbLeft; 
+            float leftOrRightVal = leftOrRight == "bbRight" ? bbRight : bbLeft;
             float topOrBotVal = topOrBot == "bbTop" ? bbTop : bbBot;
             return new Tuple<float, float>(leftOrRightVal, topOrBotVal);
+
         }
     }
 
-    
+
 }

@@ -24,13 +24,13 @@ namespace IndicoToolkit.AutoReview
         {
             foreach (Prediction prediction in predictions)
             {
-                if (prediction.getValue("rejected") == null && labels.Contains(prediction.getLabel()))
+                if (labels.Contains(prediction.Label))
                 {
-                    string predLabel = prediction.getLabel();
-                    if (prediction.getValue($"confidence.{predLabel}") < confThreshold)
+                    string predLabel = prediction.Label;
+                    if (prediction.Confidence[predLabel] < confThreshold)
                     {
-                        prediction.setValue("rejected", true);
-                        prediction.removeKey("accepted");
+                        prediction.Rejected = true;
+                        prediction.Accepted = false;
                     }
                 }
             }
@@ -50,12 +50,12 @@ namespace IndicoToolkit.AutoReview
         {
             foreach (Prediction prediction in predictions)
             {
-                if (prediction.getValue("rejected") == null && labels.Contains(prediction.getLabel()))
+                if (labels.Contains(prediction.Label))
                 {
-                    string predLabel = prediction.getLabel();
-                    if (prediction.getValue($"confidence.{predLabel}") > confThreshold)
+                    string predLabel = prediction.Label;
+                    if (prediction.Confidence[predLabel] > confThreshold)
                     {
-                        prediction.setValue("accepted", true);
+                        prediction.Accepted = true;
                     }
                 }
             }
@@ -75,12 +75,12 @@ namespace IndicoToolkit.AutoReview
         {
             foreach (Prediction prediction in predictions)
             {
-                if (labels.Contains(prediction.getLabel()))
+                if (labels.Contains(prediction.Label))
                 {
-                    string textValue = prediction.getValue("text");
+                    string textValue = prediction.Text;
                     if (textValue.Length < minLengthThreshold)
                     {
-                        prediction.setValue("rejected", true);
+                        prediction.Rejected = true;
                     }
                 }
             }
@@ -100,12 +100,12 @@ namespace IndicoToolkit.AutoReview
         {
             foreach (Prediction prediction in predictions)
             {
-                if (labels.Contains(prediction.getLabel()))
+                if (labels.Contains(prediction.Label))
                 {
-                    string textValue = prediction.getValue("text");
+                    string textValue = prediction.Text;
                     if (textValue.Length > maxLengthThreshold)
                     {
-                        prediction.setValue("rejected", true);
+                        prediction.Rejected = true;
                     }
                 }
             }
