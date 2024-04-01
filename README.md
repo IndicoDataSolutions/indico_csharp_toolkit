@@ -29,7 +29,43 @@ You will need the following environment variables to run the entire test suite:
 - `MODEL_ID`: Corresponding model Id to the dataset
 
 ### Example 
-<TODO>
+How to get prediction results and write to CSV
+```
+using System;
+using System.IO;
+using System.Linq;
+
+using IndicoToolkit;
+using IndicoToolkit.IndicoWrapper;
+using IndicoToolkit.Types;
+
+public class Program
+{
+    private static string GetHost() -> Environment.GetEnvironmentVariable("INDICO_HOST");
+    private static string GetToken() => Environment.GetEnvironmentVariable("INDICO_KEY");
+    private static string GetWorkflowId() => Environment.GetEnvironmentVariable("WORKFLOW_ID");
+    private static string GetDirectory() => Path.Join(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "base_directory");
+
+    public static async Task Main()
+    {
+        /// Instantiate the Workflows class
+        IndicoClient client = new Client(host: GetHost(), apiTokenString: GetToken()).Create();
+        Workflows Wflow = new Workflows(client);
+
+        /// Collect files to submit
+        FileProcessing Fp = new FileProcessing();
+        Fp.GetFilePathsFromDir(GetDirectory()); 
+
+        /// Submit documents, await the results and write the results to console in batches of 10.
+        foreach (List<string> paths in Fp.BatchFiles(batchSize: 10))
+        {
+            IEnumerable<int> submissionIds = await Wflow.SubmitDocumentsToWorkflow(GetWorkflowId(), paths);
+            List<WorkflowResult> results = Wflow.GetSubmissionResultsFromIds(submissionIds.ToList());
+            Console.WriteLine(results);
+        }
+    }
+}
+```
 
 ### Contributing
 
