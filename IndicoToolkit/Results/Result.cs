@@ -105,19 +105,49 @@ public class Result : PrettyPrint
     {
         var submissionResults = json["results"]["document"]["results"] as JObject;
 
-        // Incomplete and unreviewed submissions don't include a `reviews_meta` section.
-        if (!Utils.Has<JArray>(json, "reviews_meta"))
+        foreach (var modelResults in submissionResults)
         {
-            json["reviews_meta"] = new JArray();
+            var modelName = modelResults.Key;
+            var predictions = modelResults.Value;
 
-            foreach (var modelResults in submissionResults)
+            // Incomplete and unreviewed submissions don't have review sections.
+            if (!Utils.Has<JArray>(predictions, "post_reviews"))
             {
-                JToken predictions = modelResults.Value;
-                submissionResults[modelResults.Key] = new JObject();
-                submissionResults[modelResults.Key]["pre_review"] = predictions;
-                submissionResults[modelResults.Key]["post_reviews"] = new JArray();
+                submissionResults[modelName] = new JObject();
+                submissionResults[modelName]["pre_review"] = predictions;
+                submissionResults[modelName]["post_reviews"] = new JArray();
+                predictions = submissionResults[modelName];
+            }
+
+            // Classifications aren't wrapped in lists like all other prediction types.
+            if (Utils.Has<JObject>(predictions, "pre_review"))
+            {
+                predictions["pre_review"] = new JArray { predictions["pre_review"] };
+
+                for (var index = 0; index < predictions["post_reviews"].Count(); index++)
+                    predictions["post_reviews"][index] = new JArray { predictions["post_reviews"][index] };
+            }
+
+            // Prior to 6.11, some predictions lack a `normalized` section after review.
+            foreach (JArray review in (predictions["post_reviews"] as JArray).OfType<JArray>())
+            {
+                foreach (JObject prediction in review.OfType<JObject>())
+                {
+                    if (
+                        Utils.Has<string>(prediction, "text")
+                        && !Utils.Has<JObject>(prediction, "normalized")
+                    )
+                    {
+                        prediction["normalized"] = new JObject();
+                        prediction["normalized"]["formatted"] = prediction["text"];
+                    }
+                }
             }
         }
+
+        // Incomplete and unreviewed submissions don't include a `reviews_meta` section.
+        if (!Utils.Has<JArray>(json, "reviews_meta"))
+            json["reviews_meta"] = new JArray();
 
         // Incomplete and unreviewed submissions retrieved with `SubmissionResult()`
         // have a single `{"review_id": null}` review.
@@ -128,20 +158,6 @@ public class Result : PrettyPrint
         for (var index = 0; index < json["reviews_meta"].Count(); index++)
             if (!Utils.Has<string>(json["reviews_meta"][index], "review_notes"))
                 json["reviews_meta"][index]["review_notes"] = "";
-
-        // Classifications aren't wrapped in lists like all other prediction types.
-        foreach (var modelResults in submissionResults)
-        {
-            var predictions = modelResults.Value;
-
-            if (Utils.Has<JObject>(predictions, "pre_review"))
-            {
-                predictions["pre_review"] = new JArray { predictions["pre_review"] };
-
-                for (var index = 0; index < predictions["post_reviews"].Count(); index++)
-                    predictions["post_reviews"][index] = new JArray { predictions["post_reviews"][index] };
-            }
-        }
     }
 
     // Create a Result from the root object of a v3 result file.
@@ -225,6 +241,28 @@ public class Result : PrettyPrint
     // Fix inconsistencies observed in v3 result files.
     private static void NormalizeV3Json(JObject json)
     {
+        foreach (JObject document in json["submission_results"] as JArray)
+        {
+            // Prior to 6.11, some predictions lack a `normalized` section after review.
+            if (Utils.Has<JObject>(document["model_results"], "FINAL"))
+            {
+                foreach (var modelResults in document["model_results"]["FINAL"] as JObject)
+                {
+                    foreach (var prediction in (modelResults.Value as JArray).OfType<JObject>())
+                    {
+                        if (
+                            Utils.Has<string>(prediction, "text")
+                            && !Utils.Has<JObject>(prediction, "normalized")
+                        )
+                        {
+                            prediction["normalized"] = new JObject();
+                            prediction["normalized"]["formatted"] = prediction["text"];
+                        }
+                    }
+                }
+            }
+        }
+
         // Prior to 6.8, v3 result files don't include a `reviews` section.
         if (!Utils.Has<JObject>(json, "reviews"))
             json["reviews"] = new JObject();
