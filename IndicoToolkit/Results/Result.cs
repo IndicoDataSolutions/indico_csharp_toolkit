@@ -9,8 +9,8 @@ namespace IndicoToolkit.Results;
 
 public class Result : PrettyPrint
 {
-    public ulong Id { get; init; }
     public ulong Version { get; init; }
+    public ulong SubmissionId { get; init; }
     public List<Document> Documents { get; init; }
     public List<ModelGroup> Models { get; init; }
     public PredictionList<Prediction> Predictions { get; init; }
@@ -47,8 +47,8 @@ public class Result : PrettyPrint
     {
         NormalizeV1Json(json);
 
-        var id = Utils.Get<ulong>(json, "submission_id");
         var version = Utils.Get<ulong>(json, "file_version");
+        var submissionId = Utils.Get<ulong>(json, "submission_id");
         var document = Document.FromV1Json(json);  // v1 results support only 1 document.
         var documents = new PrettyPrintList<Document> { document };
         var models = new PrettyPrintList<ModelGroup>();
@@ -91,8 +91,8 @@ public class Result : PrettyPrint
 
         return new Result
         {
-            Id = id,
             Version = version,
+            SubmissionId = submissionId,
             Documents = documents,
             Models = models,
             Predictions = predictions,
@@ -165,8 +165,8 @@ public class Result : PrettyPrint
     {
         NormalizeV3Json(json);
 
-        var id = Utils.Get<ulong>(json, "submission_id");
         var version = Utils.Get<ulong>(json, "file_version");
+        var submissionId = Utils.Get<ulong>(json, "submission_id");
         var documents = new PrettyPrintList<Document>();
         var models = new PrettyPrintList<ModelGroup>(
             Utils.Get<JObject>(json, "modelgroup_metadata")
@@ -229,8 +229,8 @@ public class Result : PrettyPrint
 
         return new Result
         {
-            Id = id,
             Version = version,
+            SubmissionId = submissionId,
             Documents = documents,
             Models = models,
             Predictions = predictions,
