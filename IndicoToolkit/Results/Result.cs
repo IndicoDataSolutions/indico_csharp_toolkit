@@ -105,42 +105,84 @@ public class Result : PrettyPrint
     {
         var submissionResults = json["results"]["document"]["results"] as JObject;
 
-        foreach (var modelResults in submissionResults)
+        foreach (var modelResult in submissionResults)
         {
-            var modelName = modelResults.Key;
-            var predictions = modelResults.Value;
+            var modelName = modelResult.Key;
+            var modelResults = modelResult.Value;
 
             // Incomplete and unreviewed submissions don't have review sections.
-            if (!Utils.Has<JArray>(predictions, "post_reviews"))
+            if (!Utils.Has<JArray>(modelResults, "post_reviews"))
             {
-                submissionResults[modelName] = new JObject();
-                submissionResults[modelName]["pre_review"] = predictions;
-                submissionResults[modelName]["post_reviews"] = new JArray();
-                predictions = submissionResults[modelName];
+                submissionResults[modelName] = new JObject
+                {
+                    ["pre_review"] = modelResults,
+                    ["post_reviews"] = new JArray(),
+                };
+                modelResults = submissionResults[modelName];
             }
 
             // Classifications aren't wrapped in lists like all other prediction types.
-            if (Utils.Has<JObject>(predictions, "pre_review"))
+            if (Utils.Has<JObject>(modelResults, "pre_review"))
             {
-                predictions["pre_review"] = new JArray { predictions["pre_review"] };
+                modelResults["pre_review"] = new JArray { modelResults["pre_review"] };
 
-                for (var index = 0; index < predictions["post_reviews"].Count(); index++)
-                    predictions["post_reviews"][index] = new JArray { predictions["post_reviews"][index] };
+                for (var index = 0; index < modelResults["post_reviews"].Count(); index++)
+                    modelResults["post_reviews"][index] = new JArray { modelResults["post_reviews"][index] };
             }
 
-            // Prior to 6.11, some predictions lack a `normalized` section after review.
-            foreach (JArray review in (predictions["post_reviews"] as JArray).OfType<JArray>())
+            var predictions = (modelResults["post_reviews"] as JArray).OfType<JArray>()
+                .SelectMany(predictions => predictions.OfType<JObject>())
+                .Concat((modelResults["pre_review"] as JArray).OfType<JObject>());
+
+            foreach (JObject prediction in predictions)
             {
-                foreach (JObject prediction in review.OfType<JObject>())
+                // Predictions added in review lack a `confidence` section.
+                if (!Utils.Has<JObject>(prediction, "confidence"))
                 {
-                    if (
-                        Utils.Has<string>(prediction, "text")
-                        && !Utils.Has<JObject>(prediction, "normalized")
-                    )
-                    {
-                        prediction["normalized"] = new JObject();
-                        prediction["normalized"]["formatted"] = prediction["text"];
-                    }
+                    prediction["confidence"] = new JObject { [Utils.Get<string>(prediction, "label")] = 0 };
+                }
+
+                // Document Extractions added in review may lack spans.
+                if (
+                    Utils.Has<string>(prediction, "text")
+                    && !Utils.Has<string>(prediction, "type")
+                    && !Utils.Has<int>(prediction, "start")
+                )
+                {
+                    prediction["start"] = 0;
+                    prediction["end"] = 0;
+                }
+
+                // Form Extractions added in review may lack bounding boxes.
+                if (
+                    Utils.Has<string>(prediction, "type")
+                    && !Utils.Has<int>(prediction, "top")
+                )
+                {
+                    prediction["top"] = 0;
+                    prediction["left"] = 0;
+                    prediction["right"] = 0;
+                    prediction["bottom"] = 0;
+                }
+
+                // Prior to 6.11, some Extractions lack a `normalized` section after review.
+                if (
+                    Utils.Has<string>(prediction, "text")
+                    && !Utils.Has<JObject>(prediction, "normalized")
+                )
+                {
+                    prediction["normalized"] = new JObject { ["formatted"] = prediction["text"] };
+                }
+
+                // Document Extractions that didn't go through a linked labels transformer
+                // lack a `groupings` section.
+                if (
+                    Utils.Has<string>(prediction, "text")
+                    && !Utils.Has<string>(prediction, "type")
+                    && !Utils.Has<JArray>(prediction, "groupings")
+                )
+                {
+                    prediction["groupings"] = new JArray();
                 }
             }
         }
@@ -241,25 +283,70 @@ public class Result : PrettyPrint
     // Fix inconsistencies observed in v3 result files.
     private static void NormalizeV3Json(JObject json)
     {
-        foreach (JObject document in json["submission_results"] as JArray)
+        var predictions = (json["submission_results"] as JArray).OfType<JObject>()
+            .SelectMany(submissionResult => (submissionResult["model_results"] as JObject).Properties()
+                .SelectMany(modelResult => (modelResult.Value as JObject).Properties()
+                    .SelectMany(reviewResult => (reviewResult.Value as JArray).OfType<JObject>()
+                    )
+                )
+            );
+
+        foreach (JObject prediction in predictions)
         {
-            // Prior to 6.11, some predictions lack a `normalized` section after review.
-            if (Utils.Has<JObject>(document["model_results"], "FINAL"))
+            // Predictions added in review lack a `confidence` section.
+            if (!Utils.Has<JObject>(prediction, "confidence"))
             {
-                foreach (var modelResults in document["model_results"]["FINAL"] as JObject)
+                prediction["confidence"] = new JObject { [Utils.Get<string>(prediction, "label")] = 0 };
+            }
+
+            // Document Extractions added in review may lack spans.
+            if (
+                Utils.Has<string>(prediction, "text")
+                && !Utils.Has<string>(prediction, "type")
+                && !Utils.Has<JArray>(prediction, "spans")
+            )
+            {
+                prediction["spans"] = new JArray
                 {
-                    foreach (var prediction in (modelResults.Value as JArray).OfType<JObject>())
+                    new JObject
                     {
-                        if (
-                            Utils.Has<string>(prediction, "text")
-                            && !Utils.Has<JObject>(prediction, "normalized")
-                        )
-                        {
-                            prediction["normalized"] = new JObject();
-                            prediction["normalized"]["formatted"] = prediction["text"];
-                        }
-                    }
-                }
+                        ["page_num"] = prediction["page_num"],
+                        ["start"] = 0,
+                        ["end"] = 0,
+                    },
+                };
+            }
+
+            // Form Extractions added in review may lack bounding boxes.
+            if (
+                Utils.Has<string>(prediction, "type")
+                && !Utils.Has<int>(prediction, "top")
+            )
+            {
+                prediction["top"] = 0;
+                prediction["left"] = 0;
+                prediction["right"] = 0;
+                prediction["bottom"] = 0;
+            }
+
+            // Prior to 6.11, some Extractions lack a `normalized` section after review.
+            if (
+                Utils.Has<string>(prediction, "text")
+                && !Utils.Has<JObject>(prediction, "normalized")
+            )
+            {
+                prediction["normalized"] = new JObject { ["formatted"] = prediction["text"] };
+            }
+
+            // Document Extractions that didn't go through a linked labels transformer
+            // lack a `groupings` section.
+            if (
+                Utils.Has<string>(prediction, "text")
+                && !Utils.Has<string>(prediction, "type")
+                && !Utils.Has<JArray>(prediction, "groupings")
+            )
+            {
+                prediction["groupings"] = new JArray();
             }
         }
 
