@@ -11,7 +11,7 @@ public class Prediction : PrettyPrint
     public ModelGroup Model { get; init; }
     public Review? Review { get; init; }  // Pre-review predictions do not have an associated Review.
 
-    public string Label { get; init; }
+    public string Label { get; set; }
     [NoPrint]
     public Dictionary<string, double> Confidences { get; init; }
     [NoPrint]
