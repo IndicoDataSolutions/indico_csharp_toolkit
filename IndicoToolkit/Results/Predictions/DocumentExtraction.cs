@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IndicoToolkit.Results;
 
@@ -8,6 +9,7 @@ public class DocumentExtraction : Extraction
 {
     public int Start { get; set; }
     public int End { get; set; }
+    public HashSet<Group> Groups { get; set; }
 
     // Create an DocumentExtraction from a v1 prediction object.
     public static DocumentExtraction FromV1Json(Document document, ModelGroup model, Review? review, JToken json)
@@ -27,6 +29,10 @@ public class DocumentExtraction : Extraction
             Page = Utils.Get<int>(json, "page_num"),
             Start = Utils.Get<int>(json, "start"),
             End = Utils.Get<int>(json, "end"),
+            Groups = new HashSet<Group>(
+                Utils.Get<JArray>(json, "groupings")
+                    .Select(value => Group.FromJson(value))
+            ),
             Extras = json as JObject,
         };
     }
@@ -50,6 +56,10 @@ public class DocumentExtraction : Extraction
             Page = Utils.Get<int>(span, "page_num"),
             Start = Utils.Get<int>(span, "start"),
             End = Utils.Get<int>(span, "end"),
+            Groups = new HashSet<Group>(
+                Utils.Get<JArray>(json, "groupings")
+                    .Select(value => Group.FromJson(value))
+            ),
             Extras = json as JObject,
         };
     }
@@ -62,6 +72,7 @@ public class DocumentExtraction : Extraction
         Extras["page_num"] = Page;
         Extras["start"] = Start;
         Extras["end"] = End;
+        Extras["groupings"] = new JArray(Groups.Select(group => group.ToJson()));
 
         if (Accepted)
             Extras["accepted"] = true;
@@ -79,6 +90,7 @@ public class DocumentExtraction : Extraction
         Extras["spans"][0]["page_num"] = Page;
         Extras["spans"][0]["start"] = Start;
         Extras["spans"][0]["end"] = End;
+        Extras["groupings"] = new JArray(Groups.Select(group => group.ToJson()));
 
         if (Accepted)
             Extras["accepted"] = true;
