@@ -7,7 +7,7 @@ namespace IndicoToolkit.Results;
 public enum TaskType
 {
     CLASSIFICATION,
-    EXTRACTION,
+    DOCUMENT_EXTRACTION,
     FORM_EXTRACTION,
     UNBUNDLING
 }
@@ -25,7 +25,7 @@ public class ModelGroup : PrettyPrint
         if (taskType == "classification")
             return TaskType.CLASSIFICATION;
         else if (taskType == "annotation")
-            return TaskType.EXTRACTION;
+            return TaskType.DOCUMENT_EXTRACTION;
         else if (taskType == "form_extraction")
             return TaskType.FORM_EXTRACTION;
         else if (taskType == "classification_unbundling")
@@ -45,13 +45,13 @@ public class ModelGroup : PrettyPrint
             if (Utils.Has<string>(prediction, "type"))
                 return TaskType.FORM_EXTRACTION;
             else if (Utils.Has<string>(prediction, "text"))
-                return TaskType.EXTRACTION;
+                return TaskType.DOCUMENT_EXTRACTION;
             else
                 return TaskType.CLASSIFICATION;
         }
         else
         {
-            return TaskType.EXTRACTION;
+            return TaskType.DOCUMENT_EXTRACTION;
         }
     }
 
