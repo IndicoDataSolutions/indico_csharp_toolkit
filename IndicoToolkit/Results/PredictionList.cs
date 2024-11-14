@@ -87,6 +87,8 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
         ICollection<string>? labelIn = null,
         double? minConfidence = null,
         double? maxConfidence = null,
+        int? page = null,
+        ICollection<int>? pageIn = null,
         bool? accepted = null,
         bool? rejected = null,
         bool? checked_ = null,
@@ -127,6 +129,12 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
 
         if (maxConfidence != null)
             predicates.Add(pred => pred.Confidence <= maxConfidence);
+
+        if (page != null)
+            predicates.Add(pred => pred is Extraction && (pred as Extraction).Page == page);
+
+        if (pageIn != null)
+            predicates.Add(pred => pred is Extraction && pageIn.Contains((pred as Extraction).Page));
 
         if (accepted != null)
             predicates.Add(pred => pred is Extraction && (pred as Extraction).Accepted == accepted);
