@@ -19,11 +19,11 @@ public class FormExtraction : AutoReviewable
     public bool Signed { get; set; }
     public string Text { get; set; }
 
-    public ulong Page { get; set; }
-    public ulong Top { get; set; }
-    public ulong Left { get; set; }
-    public ulong Right { get; set; }
-    public ulong Bottom { get; set; }
+    public int Page { get; set; }
+    public int Top { get; set; }
+    public int Left { get; set; }
+    public int Right { get; set; }
+    public int Bottom { get; set; }
 
     // Determine the form extraction type of a prediction from its string representation.
     public static FormExtractionType FormExtractionTypeFromString(string formExtractionType)
@@ -57,11 +57,11 @@ public class FormExtraction : AutoReviewable
             Checked = Utils.Has<bool>(structured, "checked") && Utils.Get<bool>(structured, "checked"),
             Signed = Utils.Has<bool>(structured, "signed") && Utils.Get<bool>(structured, "signed"),
             Text = Utils.Get<string>(normalized, "formatted"),
-            Page = Utils.Get<ulong>(json, "page_num"),
-            Top = Utils.Get<ulong>(json, "top"),
-            Left = Utils.Get<ulong>(json, "left"),
-            Right = Utils.Get<ulong>(json, "right"),
-            Bottom = Utils.Get<ulong>(json, "bottom"),
+            Page = Utils.Get<int>(json, "page_num"),
+            Top = Utils.Get<int>(json, "top"),
+            Left = Utils.Get<int>(json, "left"),
+            Right = Utils.Get<int>(json, "right"),
+            Bottom = Utils.Get<int>(json, "bottom"),
             Extras = json as JObject,
         };
     }

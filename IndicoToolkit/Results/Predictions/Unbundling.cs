@@ -7,7 +7,7 @@ namespace IndicoToolkit.Results;
 
 public class Unbundling : Prediction
 {
-    public List<ulong> Pages { get; set; }
+    public List<int> Pages { get; set; }
 
     // Create a Unbundling from a v3 prediction JSON.
     public static Unbundling FromV3Json(Document document, ModelGroup model, Review? review, JToken json)
@@ -21,7 +21,7 @@ public class Unbundling : Prediction
             Review = review,
             Label = Utils.Get<string>(json, "label"),
             Confidences = Utils.Get<Dictionary<string, double>>(json, "confidence"),
-            Pages = spans.Select(span => Utils.Get<ulong>(span, "page_num")).ToList(),
+            Pages = spans.Select(span => Utils.Get<int>(span, "page_num")).ToList(),
             Extras = json as JObject,
         };
     }

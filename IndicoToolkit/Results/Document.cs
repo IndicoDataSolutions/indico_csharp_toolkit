@@ -6,7 +6,7 @@ namespace IndicoToolkit.Results;
 
 public class Document : PrettyPrint
 {
-    public ulong? Id { get; init; }  // v1 result files don't include Document IDs.
+    public int? Id { get; init; }  // v1 result files don't include Document IDs.
     public string? Name { get; init; }  // v1 result files don't include Document Names.
     public string EtlOutputUrl { get; init; }
     public string FullTextUrl { get; init; }
@@ -44,7 +44,7 @@ public class Document : PrettyPrint
 
         return new Document
         {
-            Id = Utils.Get<ulong>(json, "submissionfile_id"),
+            Id = Utils.Get<int>(json, "submissionfile_id"),
             Name = Utils.Get<string>(json, "input_filename"),
             EtlOutputUrl = etlOutputUrl,
             FullTextUrl = fullTextUrl,

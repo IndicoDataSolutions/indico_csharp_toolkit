@@ -7,9 +7,9 @@ namespace IndicoToolkit.Results;
 public class Extraction : AutoReviewable
 {
     public string Text { get; set; }
-    public ulong Page { get; set; }
-    public ulong Start { get; set; }
-    public ulong End { get; set; }
+    public int Page { get; set; }
+    public int Start { get; set; }
+    public int End { get; set; }
 
     // Create an Extraction from a v1 prediction object.
     public static Extraction FromV1Json(Document document, ModelGroup model, Review? review, JToken json)
@@ -26,9 +26,9 @@ public class Extraction : AutoReviewable
             Accepted = Utils.Has<bool>(json, "accepted") && Utils.Get<bool>(json, "accepted"),
             Rejected = Utils.Has<bool>(json, "rejeted") && Utils.Get<bool>(json, "rejeted"),
             Text = Utils.Get<string>(normalized, "formatted"),
-            Page = Utils.Get<ulong>(json, "page_num"),
-            Start = Utils.Get<ulong>(json, "start"),
-            End = Utils.Get<ulong>(json, "end"),
+            Page = Utils.Get<int>(json, "page_num"),
+            Start = Utils.Get<int>(json, "start"),
+            End = Utils.Get<int>(json, "end"),
             Extras = json as JObject,
         };
     }
@@ -49,9 +49,9 @@ public class Extraction : AutoReviewable
             Accepted = Utils.Has<bool>(json, "accepted") && Utils.Get<bool>(json, "accepted"),
             Rejected = Utils.Has<bool>(json, "rejeted") && Utils.Get<bool>(json, "rejeted"),
             Text = Utils.Get<string>(normalized, "formatted"),
-            Page = Utils.Get<ulong>(span, "page_num"),
-            Start = Utils.Get<ulong>(span, "start"),
-            End = Utils.Get<ulong>(span, "end"),
+            Page = Utils.Get<int>(span, "page_num"),
+            Start = Utils.Get<int>(span, "start"),
+            End = Utils.Get<int>(span, "end"),
             Extras = json as JObject,
         };
     }

@@ -13,8 +13,8 @@ public enum ReviewType
 
 public class Review : PrettyPrint
 {
-    public ulong Id { get; init; }
-    public ulong ReviewerId { get; init; }
+    public int Id { get; init; }
+    public int ReviewerId { get; init; }
     public string Notes { get; init; }
     public bool Rejected { get; init; }
     public ReviewType Type { get; init; }
@@ -37,8 +37,8 @@ public class Review : PrettyPrint
     {
         return new Review
         {
-            Id = Utils.Get<ulong>(json, "review_id"),
-            ReviewerId = Utils.Get<ulong>(json, "reviewer_id"),
+            Id = Utils.Get<int>(json, "review_id"),
+            ReviewerId = Utils.Get<int>(json, "reviewer_id"),
             Notes = Utils.Get<string>(json, "review_notes"),
             Rejected = Utils.Get<bool>(json, "review_rejected"),
             Type = Review.ReviewTypeFromString(Utils.Get<string>(json, "review_type")),

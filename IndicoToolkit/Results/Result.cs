@@ -9,8 +9,8 @@ namespace IndicoToolkit.Results;
 
 public class Result : PrettyPrint
 {
-    public ulong Version { get; init; }
-    public ulong SubmissionId { get; init; }
+    public int Version { get; init; }
+    public int SubmissionId { get; init; }
     public List<Document> Documents { get; init; }
     public List<ModelGroup> Models { get; init; }
     public PredictionList<Prediction> Predictions { get; init; }
@@ -32,7 +32,7 @@ public class Result : PrettyPrint
     // Create a Result from the root object of a result file.
     public static Result FromJson(JObject json)
     {
-        var version = Utils.Get<ulong>(json, "file_version");
+        var version = Utils.Get<int>(json, "file_version");
 
         if (version == 1)
             return FromV1Json(json);
@@ -47,8 +47,8 @@ public class Result : PrettyPrint
     {
         NormalizeV1Json(json);
 
-        var version = Utils.Get<ulong>(json, "file_version");
-        var submissionId = Utils.Get<ulong>(json, "submission_id");
+        var version = Utils.Get<int>(json, "file_version");
+        var submissionId = Utils.Get<int>(json, "submission_id");
         var document = Document.FromV1Json(json);  // v1 results support only 1 document.
         var documents = new PrettyPrintList<Document> { document };
         var models = new PrettyPrintList<ModelGroup>();
@@ -165,8 +165,8 @@ public class Result : PrettyPrint
     {
         NormalizeV3Json(json);
 
-        var version = Utils.Get<ulong>(json, "file_version");
-        var submissionId = Utils.Get<ulong>(json, "submission_id");
+        var version = Utils.Get<int>(json, "file_version");
+        var submissionId = Utils.Get<int>(json, "submission_id");
         var documents = new PrettyPrintList<Document>();
         var models = new PrettyPrintList<ModelGroup>(
             Utils.Get<JObject>(json, "modelgroup_metadata")
@@ -194,7 +194,7 @@ public class Result : PrettyPrint
             // Parse pre-review predictions (which don't have an associated review).
             foreach (var modelJson in originalJson)
             {
-                var modelId = ulong.Parse(modelJson.Key);
+                var modelId = int.Parse(modelJson.Key);
                 var model = models.Where(model => model.Id == modelId).First();
 
                 foreach (var predictionJson in modelJson.Value as JArray)
@@ -214,7 +214,7 @@ public class Result : PrettyPrint
 
                 foreach (var modelJson in finalJson)
                 {
-                    var modelId = ulong.Parse(modelJson.Key);
+                    var modelId = int.Parse(modelJson.Key);
                     var model = models.Where(model => model.Id == modelId).First();
 
                     foreach (var predictionJson in modelJson.Value as JArray)

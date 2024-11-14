@@ -15,7 +15,7 @@ public enum TaskType
 
 public class ModelGroup : PrettyPrint
 {
-    public ulong? Id { get; init; }  // v1 result files don't include Model Group IDs.
+    public int? Id { get; init; }  // v1 result files don't include Model Group IDs.
     public string Name { get; init; }
     public TaskType TaskType { get; init; }
 
@@ -74,7 +74,7 @@ public class ModelGroup : PrettyPrint
     {
         return new ModelGroup
         {
-            Id = Utils.Get<ulong>(json, "id"),
+            Id = Utils.Get<int>(json, "id"),
             Name = Utils.Get<string>(json, "name"),
             TaskType = TaskTypeFromString(Utils.Get<string>(json, "task_type")),
         };
