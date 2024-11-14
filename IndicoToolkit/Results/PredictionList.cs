@@ -219,13 +219,7 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
 
         foreach (var document in documents)
         {
-            var documentSection = new JObject();
             var modelResults = new JObject();
-
-            documentSection["submissionfile_id"] = document.Id;
-            documentSection["model_results"] = modelResults;
-            documentSection["component_results"] = new JObject();
-
             var predictionsByModel = this.Where(
                 document: document
             ).GroupBy<ModelGroup>(
@@ -247,7 +241,14 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
                 if (!modelResults.ContainsKey(modelId))
                     modelResults[modelId] = new JArray();
 
-            changes.Add(documentSection);
+            changes.Add(
+                new JObject
+                {
+                    ["submissionfile_id"] = document.Id,
+                    ["model_results"] = modelResults,
+                    ["component_results"] = new JObject(),
+                }
+            );
         }
 
         return changes;
