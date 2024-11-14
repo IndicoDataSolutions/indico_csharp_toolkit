@@ -11,6 +11,8 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
     [NoPrint]
     public PredictionList<Classification> Classifications => OfType<Classification>();
     [NoPrint]
+    public PredictionList<DocumentExtraction> DocumentExtractions => OfType<DocumentExtraction>();
+    [NoPrint]
     public PredictionList<Extraction> Extractions => OfType<Extraction>();
     [NoPrint]
     public PredictionList<FormExtraction> FormExtractions => OfType<FormExtraction>();
@@ -127,10 +129,10 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
             predicates.Add(pred => pred.Confidence <= maxConfidence);
 
         if (accepted != null)
-            predicates.Add(pred => pred is AutoReviewable && (pred as AutoReviewable).Accepted == accepted);
+            predicates.Add(pred => pred is Extraction && (pred as Extraction).Accepted == accepted);
 
         if (rejected != null)
-            predicates.Add(pred => pred is AutoReviewable && (pred as AutoReviewable).Rejected == rejected);
+            predicates.Add(pred => pred is Extraction && (pred as Extraction).Rejected == rejected);
 
         if (checked_ != null)
             predicates.Add(pred => pred is FormExtraction && (pred as FormExtraction).Checked == checked_);
@@ -149,28 +151,28 @@ public class PredictionList<PredictionType> : PrettyPrintList<PredictionType> wh
     // Accept all extractions in the list.
     public PredictionList<PredictionType> Accept()
     {
-        OfType<AutoReviewable>().Apply(prediction => prediction.Accept());
+        Extractions.Apply(prediction => prediction.Accept());
         return this;
     }
 
     // Unaccept all extractions in the list.
     public PredictionList<PredictionType> Unaccept()
     {
-        OfType<AutoReviewable>().Apply(prediction => prediction.Unaccept());
+        Extractions.Apply(prediction => prediction.Unaccept());
         return this;
     }
 
     // Reject all extractions in the list.
     public PredictionList<PredictionType> Reject()
     {
-        OfType<AutoReviewable>().Apply(prediction => prediction.Reject());
+        Extractions.Apply(prediction => prediction.Reject());
         return this;
     }
 
     // Unreject all extractions in the list.
     public PredictionList<PredictionType> Unreject()
     {
-        OfType<AutoReviewable>().Apply(prediction => prediction.Unreject());
+        Extractions.Apply(prediction => prediction.Unreject());
         return this;
     }
 

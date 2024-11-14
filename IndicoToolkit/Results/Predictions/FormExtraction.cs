@@ -12,14 +12,12 @@ public enum FormExtractionType
 }
 
 
-public class FormExtraction : AutoReviewable
+public class FormExtraction : Extraction
 {
     public FormExtractionType Type { get; set; }
     public bool Checked { get; set; }
     public bool Signed { get; set; }
-    public string Text { get; set; }
 
-    public int Page { get; set; }
     public int Top { get; set; }
     public int Left { get; set; }
     public int Right { get; set; }
@@ -53,11 +51,11 @@ public class FormExtraction : AutoReviewable
             Confidences = Utils.Get<Dictionary<string, double>>(json, "confidence"),
             Accepted = Utils.Has<bool>(json, "accepted") && Utils.Get<bool>(json, "accepted"),
             Rejected = Utils.Has<bool>(json, "rejected") && Utils.Get<bool>(json, "rejected"),
+            Text = Utils.Get<string>(normalized, "formatted"),
+            Page = Utils.Get<int>(json, "page_num"),
             Type = FormExtractionTypeFromString(Utils.Get<string>(json, "type")),
             Checked = Utils.Has<bool>(structured, "checked") && Utils.Get<bool>(structured, "checked"),
             Signed = Utils.Has<bool>(structured, "signed") && Utils.Get<bool>(structured, "signed"),
-            Text = Utils.Get<string>(normalized, "formatted"),
-            Page = Utils.Get<int>(json, "page_num"),
             Top = Utils.Get<int>(json, "top"),
             Left = Utils.Get<int>(json, "left"),
             Right = Utils.Get<int>(json, "right"),

@@ -29,7 +29,7 @@ public class Prediction : PrettyPrint
         if (model.TaskType == TaskType.CLASSIFICATION)
             return Classification.FromV1Json(document, model, review, json);
         else if (model.TaskType == TaskType.DOCUMENT_EXTRACTION)
-            return Extraction.FromV1Json(document, model, review, json);
+            return DocumentExtraction.FromV1Json(document, model, review, json);
         else if (model.TaskType == TaskType.FORM_EXTRACTION)
             return FormExtraction.FromV1Json(document, model, review, json);
         else
@@ -42,7 +42,7 @@ public class Prediction : PrettyPrint
         if (model.TaskType == TaskType.CLASSIFICATION)
             return Classification.FromV3Json(document, model, review, json);
         else if (model.TaskType == TaskType.DOCUMENT_EXTRACTION)
-            return Extraction.FromV3Json(document, model, review, json);
+            return DocumentExtraction.FromV3Json(document, model, review, json);
         else if (model.TaskType == TaskType.FORM_EXTRACTION)
             return FormExtraction.FromV3Json(document, model, review, json);
         else if (model.TaskType == TaskType.UNBUNDLING)
